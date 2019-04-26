@@ -1,7 +1,7 @@
 README for Dual Threshold Optimization (DTO)
 
 
-I. Prepping the data:
+**I. Prepping the data:**
 Every dataset must be organized in a single directory with the following files:
 1. TFNames.csv - a CSV file with a list of the transcription factors (or conditions) for which data is available
 2. GeneNames.csv - a CSV file containing a matrix of the genes that correspond to each score in the data matrix
@@ -13,7 +13,7 @@ Every dataset must be organized in a single directory with the following files:
 4. Using NetProphet data:
 	The output network from NetProphet can be used easily with DTO. regulators.txt corresponds to TFNames.csv and genes.txt corresponds to GeneNames.csv after it has been copied to fill the full matrix of data. The adjcency matrix can either be converted directly to Data.csv, but often times it is desirable to restrict the number of edges to the top N edges. This can be done using computeTopNEdges() in loadData.py. Simply modify the command in the main method to adjust the input file, output directory, and the desired number of edges. This will produce the Data.csv file that can be used directly in DTO, maintaining the order of TFs and genes in the matrix. 
 
-II. Overview of the analysis
+**II. Overview of the analysis**
 1. Scripts
    1. loadData.py - contains functions both to parse data into the appropriate format and functions used by other scripts to load saved data for analysis
    2. thresholdSearch.py - the script used to prepare the data and sbatch scripts for the dual threshold analysis (this is the script you will run)
@@ -27,7 +27,7 @@ II. Overview of the analysis
     4. Cutoffs for each TF from the randomizations used to determine the set of acceptable TFs
    7. createBinaryEdgeFile.py - takes in the set of acceptable TFs from two different analyses and produces a combined set of edges for those two analyses with binary flags indicated which analyses each edge participates in
 2. The following are the parameters necessary to run a DTO analysis
-   * -d/--de_dir: the path to the directory containing differential expression data
+   * `-d/--de_dir`: the path to the directory containing differential expression data
    * -b/--bin_dir: the path to the directory containing binding data
    * -j/--DE_decreasing: a boolean indicating if the DE data should be ranked in increasing or decreasing order
    * -k/--Bin_decreasing: a boolean indicating if the binding data should be ranked in increasing or decreasing order
@@ -40,7 +40,8 @@ II. Overview of the analysis
    * -a/--organism (default = "yeast"): a string indicating the organism that is being studied
 3. Running a DTO requires two different analyses to be run, one of which will be randomized. After each one has been run, they must both be compiled (in a sense, organizing the results into a single file). Finally, the number of acceptable TFs must be computed and a final set of results produced.
 
-III. The following steps show how to walk through each of these steps for an analysis. In this example, we will run an analysis that intersects the Harbison ChIP data with a ZEV-based NetProphet network.
+**III. Running the analysis** 
+(The following steps show how to walk through each of these steps for an analysis. In this example, we will run an analysis that intersects the Harbison ChIP data with a ZEV-based NetProphet network.)
 1. Parse Harbison ChIP data into the proper format for DTO:
 	The parseData() function in loadData.py will convert a directory that contains a distinct file for each condition into the TF list and gene/data matrices necessary for DTO. To use this function, modify the skeleton in the main method, and run the script on the command line. The function takes in the following parameters:
    1. locIn - The path to the directory of input data (each file must have the TF/condition in its name, and must be formatted as a list of genes with scores for each)
@@ -60,7 +61,7 @@ This function can handle many but not all formats of raw data. You may need to d
    4. If running an analysis with yeast, prepare a gene conversion file with common names in column 0 and systematic names in column 1
 4. Run the analyses:
    1. Run the standard analysis - modify the file paths of the following command to agree with your file structure and run it on the command line:
-	python thresholdSearch.py --de_dir home/Data/NetProphet_Z_15_45_90_150K/ --bin_dir home/Data/HarbisonYPD/ --sbatch_loc home/Analyses/Harbison_NetProphet_ZEV_15_45_90/ --genes_universe home/ExtraFiles/Harbison_NetProphet_Z_Universe.txt --geneNames_file home/ExtraFiles/YeastCommonAndSystematicGeneNames.csv --DE_decreasing True --Bin_decreasing False --random False
+	`python thresholdSearch.py --de_dir home/Data/NetProphet_Z_15_45_90_150K/ --bin_dir home/Data/HarbisonYPD/ --sbatch_loc home/Analyses/Harbison_NetProphet_ZEV_15_45_90/ --genes_universe home/ExtraFiles/Harbison_NetProphet_Z_Universe.txt --geneNames_file home/ExtraFiles/YeastCommonAndSystematicGeneNames.csv --DE_decreasing True --Bin_decreasing False --random False`
    2. Run the randomized analysis - modify the file paths of the following command to agree with your file structure and run it on the command line:
 	python thresholdSearch.py --de_dir home/Data/NetProphet_Z_15_45_90_150K/ --bin_dir home/Data/HarbisonYPD/ --sbatch_loc home/Analyses/Harbison_NetProphet_ZEV_15_45_90_Rand/ --genes_universe home/ExtraFiles/Harbison_NetProphet_Z_Universe.txt --geneNames_file home/ExtraFiles/YeastCommonAndSystematicGeneNames.csv --DE_decreasing True --Bin_decreasing False --random True
    3. Compile the results - modify the file paths of the following command to agree with your file structure and run it on the command line:
