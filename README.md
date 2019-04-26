@@ -5,8 +5,8 @@ I. Prepping the data:
 Every dataset must be organized in a single directory with the following files:
 1. TFNames.csv - a CSV file with a list of the transcription factors (or conditions) for which data is available
 2. GeneNames.csv - a CSV file containing a matrix of the genes that correspond to each score in the data matrix
-   a. Each row in this matrix corresponds to the appropriate index in the list of TFNames
-   b. Even if the data is organized with the same order of genes in each condition, the matrix must be filled with one row per TF/condition
+   1. Each row in this matrix corresponds to the appropriate index in the list of TFNames
+   2. Even if the data is organized with the same order of genes in each condition, the matrix must be filled with one row per TF/condition
 3. Data.csv - a CSV file containing the values that are going to be used to rank-order the genes in GeneNames.csv
    1. Each row in this matrix corresponds to the appropriate index in the list of TFNames
    2. The data can be of any form (Pvalue, log-fold change, etc.)
@@ -14,22 +14,22 @@ Every dataset must be organized in a single directory with the following files:
 	The output network from NetProphet can be used easily with DTO. regulators.txt corresponds to TFNames.csv and genes.txt corresponds to GeneNames.csv after it has been copied to fill the full matrix of data. The adjcency matrix can either be converted directly to Data.csv, but often times it is desirable to restrict the number of edges to the top N edges. This can be done using computeTopNEdges() in loadData.py. Simply modify the command in the main method to adjust the input file, output directory, and the desired number of edges. This will produce the Data.csv file that can be used directly in DTO, maintaining the order of TFs and genes in the matrix. 
 
 II. Overview of the analysis
-	1. Scripts
-		1. loadData.py - contains functions both to parse data into the appropriate format and functions used by other scripts to load saved data for analysis
-		2. thresholdSearch.py - the script used to prepare the data and sbatch scripts for the dual threshold analysis (this is the script you will run)
-		3. runDualThreshold.py - the script that perfoms that actual dual thresholding (run by the sbatch scripts created by thresholdSearch.py)
-		4. statistics.py - contains the funtions used by runDualThreshold.py to compute various statistical measures on the subsets
-		5. compileResults.py - compiles the results from the many csv files produced by either standard and dual threshold analyses into a single file
-		6. computeAcceptableTFs.py - parses the results from a corresponding pair of compiled standard and randomized results and produces the following outputs:
-			1. Results for the acceptable TFs 
-			2. Target genes for the acceptable TFs
-			3. Edges for the acceptable TFs
-			4. Cutoffs for each TF from the randomizations used to determine the set of acceptable TFs
-		7. createBinaryEdgeFile.py - takes in the set of acceptable TFs from two different analyses and produces a combined set of edges for those two analyses with binary flags indicated which analyses each edge participates in
-	2. The following are the parameters necessary to run a DTO analysis
-		-d/--de_dir: the path to the directory containing differential expression data
-		-b/--bin_dir: the path to the directory containing binding data
-		-j/--DE_decreasing: a boolean indicating if the DE data should be ranked in increasing or decreasing order
+1. Scripts
+  1. loadData.py - contains functions both to parse data into the appropriate format and functions used by other scripts to load saved data for analysis
+  2. thresholdSearch.py - the script used to prepare the data and sbatch scripts for the dual threshold analysis (this is the script you will run)
+  3. runDualThreshold.py - the script that perfoms that actual dual thresholding (run by the sbatch scripts created by thresholdSearch.py)
+  4. statistics.py - contains the funtions used by runDualThreshold.py to compute various statistical measures on the subsets
+  5. compileResults.py - compiles the results from the many csv files produced by either standard and dual threshold analyses into a single file
+  6. computeAcceptableTFs.py - parses the results from a corresponding pair of compiled standard and randomized results and produces the following outputs:
+   1. Results for the acceptable TFs 
+   2. Target genes for the acceptable TFs
+   3. Edges for the acceptable TFs
+   4. Cutoffs for each TF from the randomizations used to determine the set of acceptable TFs
+  7. createBinaryEdgeFile.py - takes in the set of acceptable TFs from two different analyses and produces a combined set of edges for those two analyses with binary flags indicated which analyses each edge participates in
+2. The following are the parameters necessary to run a DTO analysis
+  --d/--de_dir: the path to the directory containing differential expression data
+  *-b/--bin_dir: the path to the directory containing binding data
+  -j/--DE_decreasing: a boolean indicating if the DE data should be ranked in increasing or decreasing order
 		-k/--Bin_decreasing: a boolean indicating if the binding data should be ranked in increasing or decreasing order
 		-r/--random: a boolean indicating whether this analysis should perform the standard optimization or randomized optimizations
 		-g/--geneNames_file: the path to the conversion file between common and systematic names of genes for yeast
