@@ -27,8 +27,8 @@ II. Overview of the analysis
    4. Cutoffs for each TF from the randomizations used to determine the set of acceptable TFs
   7. createBinaryEdgeFile.py - takes in the set of acceptable TFs from two different analyses and produces a combined set of edges for those two analyses with binary flags indicated which analyses each edge participates in
 2. The following are the parameters necessary to run a DTO analysis
-  --d/--de_dir: the path to the directory containing differential expression data
-  *-b/--bin_dir: the path to the directory containing binding data
+  - -d/--de_dir: the path to the directory containing differential expression data
+  * -b/--bin_dir: the path to the directory containing binding data
   -j/--DE_decreasing: a boolean indicating if the DE data should be ranked in increasing or decreasing order
 		-k/--Bin_decreasing: a boolean indicating if the binding data should be ranked in increasing or decreasing order
 		-r/--random: a boolean indicating whether this analysis should perform the standard optimization or randomized optimizations
