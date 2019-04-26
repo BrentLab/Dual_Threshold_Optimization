@@ -5,11 +5,11 @@ I. Prepping the data:
 Every dataset must be organized in a single directory with the following files:
 1. TFNames.csv - a CSV file with a list of the transcription factors (or conditions) for which data is available
 2. GeneNames.csv - a CSV file containing a matrix of the genes that correspond to each score in the data matrix
-  a. Each row in this matrix corresponds to the appropriate index in the list of TFNames
-  b. Even if the data is organized with the same order of genes in each condition, the matrix must be filled with one row per TF/condition
+  -Each row in this matrix corresponds to the appropriate index in the list of TFNames
+  -Even if the data is organized with the same order of genes in each condition, the matrix must be filled with one row per TF/condition
 3. Data.csv - a CSV file containing the values that are going to be used to rank-order the genes in GeneNames.csv
-  a. Each row in this matrix corresponds to the appropriate index in the list of TFNames
-  b. The data can be of any form (Pvalue, log-fold change, etc.)
+  -Each row in this matrix corresponds to the appropriate index in the list of TFNames
+  -The data can be of any form (Pvalue, log-fold change, etc.)
 4. Using NetProphet data:
 	The output network from NetProphet can be used easily with DTO. regulators.txt corresponds to TFNames.csv and genes.txt corresponds to GeneNames.csv after it has been copied to fill the full matrix of data. The adjcency matrix can either be converted directly to Data.csv, but often times it is desirable to restrict the number of edges to the top N edges. This can be done using computeTopNEdges() in loadData.py. Simply modify the command in the main method to adjust the input file, output directory, and the desired number of edges. This will produce the Data.csv file that can be used directly in DTO, maintaining the order of TFs and genes in the matrix. 
 
