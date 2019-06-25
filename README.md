@@ -1,7 +1,5 @@
 README for Dual Threshold Optimization (DTO)
 
-Test Insert
-
 **I. Prepping the data:**
 Every dataset must be organized in a single directory with the following files:
 1. TFNames.csv - a CSV file with a list of the transcription factors (or conditions) for which data is available
