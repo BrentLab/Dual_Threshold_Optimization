@@ -19,10 +19,10 @@ def parse_args(argv):
   parsed = parser.parse_args(argv[1:])
   return parsed
 
-def computeCutoff(pVals):
+def computeCutoff(pVals,threshold):
 	if len(pVals) < 10:
 		return 0.00001
-	position = int(round(len(pVals)*parsed.threshold))
+	position = int(round(len(pVals)*threshold))
 	sortedPVals = sorted(pVals)
 	cutoff = sortedPVals[position]
 	return cutoff
@@ -39,14 +39,11 @@ def computeEdges(acceptableTFs):
 	return edges
 
 
-def main(argv):
-	global sysDict,parsed
-	parsed = parse_args(argv)
-
+def computeTFs(data_file, rand_file, output_dir, threshold=0.01):
 	acceptableTFs = []
 	cutoffs = []
 	randData = []
-	RandFile = open(parsed.rand_file, 'r')
+	RandFile = open(rand_file, 'r')
 	randFileReader = csv.reader(RandFile)
 	for row in randFileReader:
 		randData.append(row[0:2])
@@ -54,9 +51,10 @@ def main(argv):
 	df = pd.DataFrame(randData,columns=['TF','PVal'])
 
 	# Reading in the output file
-	outputFile = open(parsed.data_file, 'r')
+	outputFile = open(data_file, 'r')
 	outputFileReader = csv.reader(outputFile)
 	acceptableTFs.append(outputFileReader.next()) #skips header row
+	# print(outputFileReader.next())
 	for row in outputFileReader:
 		TF = row[0]
 		HyperPVal = float(row[6])
@@ -64,7 +62,7 @@ def main(argv):
 		locs = df.loc[df['TF'] == TF]
 		pValsList = locs['PVal'].values.tolist()
 		pVals = [float(num) for num in pValsList]
-		cutoff = computeCutoff(pVals)
+		cutoff = computeCutoff(pVals,threshold)
 		cutoffs.append([TF,cutoff])
 		if(HyperPVal < cutoff and FDR <= 0.2):
 			acceptableTFs.append(row)
@@ -73,26 +71,32 @@ def main(argv):
 	uniqueGenes = list(set([row[1] for row in edges]))
 	uniqueGenes = [[row] for row in uniqueGenes]
 
-	with open(parsed.output_dir+"acceptableTFs.csv", 'w') as writeFile:
+	with open(output_dir+"acceptableTFs.csv", 'w') as writeFile:
 		writer = csv.writer(writeFile)
 		writer.writerows(acceptableTFs)
 
-	with open(parsed.output_dir+"TFcutoffs.csv", 'w') as writeFile:
+	with open(output_dir+"TFcutoffs.csv", 'w') as writeFile:
 		writer = csv.writer(writeFile)
 		writer.writerows(cutoffs)
 
-	with open(parsed.output_dir+"edges.csv", 'w') as writeFile:
+	with open(output_dir+"edges.csv", 'w') as writeFile:
 		writer = csv.writer(writeFile)
 		writer.writerows(edges)
 
-	with open(parsed.output_dir+"targets.csv", 'w') as writeFile:
+	with open(output_dir+"targets.csv", 'w') as writeFile:
 		writer = csv.writer(writeFile)
 		writer.writerows(uniqueGenes)
 
-	with open(parsed.output_dir+'summary.txt','w')  as writeFile:
+	with open(output_dir+'summary.txt','w')  as writeFile:
 		writeFile.write("Number of acceptableTFs: "+str(len(acceptableTFs)-1))
-		writeFile.write("\nNumber of Edges: "+str(len(edges)-1))
-		writeFile.write("\nNumber of Unique Targets: "+str(len(uniqueGenes)-1))
+		writeFile.write("\nNumber of Edges: "+str(len(edges)))
+		writeFile.write("\nNumber of Unique Targets: "+str(len(uniqueGenes)))
+
+
+def main(argv):
+	global sysDict,parsed
+	parsed = parse_args(argv)
+	computeTFs(parsed.data_file,parsed.rand_file,parsed.output_dir,parsed.threshold)
 
 
 if __name__ == "__main__":
