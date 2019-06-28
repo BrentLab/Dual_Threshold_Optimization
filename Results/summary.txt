@@ -1,0 +1,3 @@
+Number of acceptableTFs: 2
+Number of Edges: 16
+Number of Unique Targets: 16
