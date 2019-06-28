@@ -56,3 +56,4 @@ This function can handle many but not all formats of raw data. You may need to d
    2. If running an analysis with yeast, prepare a gene conversion file with common names in column 0 and systematic names in column 1
 4. Run the analysis - modify the file paths of the following command to agree with your file structure and run it on the command line:
 	`runDualThreshold.py --de_dir home/Data/NetProphet_Z_15_45_90_150K/ --bin_dir home/Data/HarbisonYPD/ --genes_universe home/ExtraFiles/Harbison_NetProphet_Z_Universe.txt --geneNames_file home/ExtraFiles/YeastCommonAndSystematicGeneNames.csv --DE_decreasing True --Bin_decreasing False --random True`
+   * The output of running this command will appear in the "Results" directory. These should be the same as what you see in the "Expected Results".

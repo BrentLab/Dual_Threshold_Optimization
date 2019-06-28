@@ -1,3 +1,0 @@
-Number of acceptableTFs: 14
-Number of Edges: 504
-Number of Unique Targets: 429
