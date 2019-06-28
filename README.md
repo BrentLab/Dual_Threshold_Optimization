@@ -35,7 +35,7 @@ Every dataset must be organized in a single directory with the following files:
    * `-o/--opt_crit (default = "pval")`: a parameter used to define the paramater used for optimization (it is recommended to keep this at the default value)
    * `-u/--genes_universe (default = "")`: the path to a file that defines the universe of genes that should be included in the analysis
    * `-a/--organism (default = "yeast")`: a string indicating the organism that is being studied
-3. Obtaining a set of acceptable TFs using DTO requires two different analyses to be run, one of which will be randomized (done by setting the 'random' argument to 'True'. After each one has been run, the number of acceptable TFs will be computed and a final set of results produced.
+3. Obtaining a set of acceptable TFs using DTO requires two different analyses to be run, one of which will be randomized (done by setting the 'random' argument to 'True'. After each one has been run, the number of acceptable TFs will be computed and a final set of results produced. If you are not interested in using randomizations to determine "acceptability" of each TF, set the "random" argument to False. This will run the analysis much more quickly, but will only produce a raw output as the hypergeometric pvalue distribution will not be computed.
 
 **III. Running the analysis** 
 (The following steps show how to walk through each of these steps for an analysis. In this example, we will run an analysis that intersects the Harbison ChIP data with a ZEV-based NetProphet network.)
