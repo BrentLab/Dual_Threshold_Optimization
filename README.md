@@ -25,12 +25,13 @@ Every dataset must be organized in a single directory with the following files:
     4. Cutoffs for each TF from the randomizations used to determine the set of acceptable TFs
    5. createBinaryEdgeFile.py - takes in the set of acceptable TFs from two different analyses and produces a combined set of edges for those two analyses with binary flags indicated which analyses each edge participates in
 2. The following are the parameters necessary to run a DTO analysis
-   * `-d/--de_dir`: the path to the directory containing differential expression data
-   * `-b/--bin_dir`: the path to the directory containing binding data
+   * `-d/--de_dir`: the path to the directory containing differential expression data (must end in a forward slash)
+   * `-b/--bin_dir`: the path to the directory containing binding data (must end in a forward slash)
+   * `-z/--output_dir`: the path to the directory where you wish to send the results (must end in a forward slash)
+   * `-g/--geneNames_file`: the path to the conversion file between common and systematic names of genes for yeast
    * `-j/--DE_decreasing`: a boolean indicating if the DE data should be ranked in increasing or decreasing order
    * `-k/--Bin_decreasing`: a boolean indicating if the binding data should be ranked in increasing or decreasing order
    * `-r/--random`: a boolean indicating whether this analysis should perform the randomized optimizations in addition to the standard optimization
-   * `-g/--geneNames_file`: the path to the conversion file between common and systematic names of genes for yeast
    * `-w/--rank_width (default = "1.01")`: a parameter used to define the resolution of the search (it is recommended to keep this at the default value)
    * `-o/--opt_crit (default = "pval")`: a parameter used to define the paramater used for optimization (it is recommended to keep this at the default value)
    * `-u/--genes_universe (default = "")`: the path to a file that defines the universe of genes that should be included in the analysis
