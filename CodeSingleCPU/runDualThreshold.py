@@ -20,8 +20,9 @@ def parse_args(argv):
   parser = argparse.ArgumentParser(description="")
   parser.add_argument("-d","--de_dir")
   parser.add_argument("-b","--bin_dir")
+  parser.add_argument("-z","--output_dir")
+  parser.add_argument("-g","--geneNames_file",default = None)
   parser.add_argument("-r","--random",default = False)
-  parser.add_argument("-g","--geneNames_file",default = "/scratch/mblab/pateln/ThresholdAnalysis_Python/ExtraFiles/YeastCommonAndSystematicGeneNames.csv")
   parser.add_argument("-s","--incl_spearman",default = False)
   parser.add_argument("-o","--opt_crit",default = "pval")
   parser.add_argument("-w","--rank_width",default = 1.01)
@@ -202,19 +203,21 @@ def runDualThresholds(DEData,BinData,TFIntersection,TFNum,GenesUniverse_Given,ra
 	optimizedResults = optimizedThresholds(TF,BinGenes,BinValues,DEGenes,DEValues,GenesUniverse)
 
 	if rand==True:
-		fileName = "../Results/output_rand.csv"
+		# fileName = "../Results/output_rand.csv"
+		fileName = parsed.output_dir + 'output_rand.csv'
 		with open(fileName,'a') as resultFile:
 			wr = csv.writer(resultFile)
 			wr.writerow([TF,optimizedResults[6]])
 	else:
-		fileName = "../Results/output.csv"
+		# fileName = "../Results/output.csv"
+		fileName = parsed.output_dir + 'output.csv'
 		with open(fileName,'a') as resultFile:
 			wr = csv.writer(resultFile)
 			wr.writerow(optimizedResults)
 
 def optimizedThresholds(TF,BinGenes,BinValues,DEGenes,DEValues,GenesUniverse):
 	global sysDict
-	if parsed.organism == "yeast":
+	if sysDict!=None:
 		TFCommon = sysDict[TF]
 	else:
 		TFCommon = TF
@@ -327,7 +330,7 @@ def optimizedThresholds(TF,BinGenes,BinValues,DEGenes,DEValues,GenesUniverse):
 	DESubGenes = DEGenes[:bestDEThresh]
 	DESubData = DEValues[:bestDEThresh]
 	GenesIntersection = list(set(DESubGenes) & set(boundSubGenes))
-	if parsed.organism == "yeast":
+	if sysDict!=None:
 		intersectionCommon = sorted(sysToCommon(GenesIntersection,sysDict))
 	else:
 		intersectionCommon = sorted(GenesIntersection)
@@ -344,7 +347,10 @@ def main(argv):
 
 	DEData = createNumpyArray(parsed.de_dir)
 	BinData = createNumpyArray(parsed.bin_dir)
-	sysDict = createSysDict(parsed.geneNames_file)
+	if parsed.geneNames_file != None:
+		sysDict = createSysDict(parsed.geneNames_file)
+	else:
+		sysDict = None
 	TFIntersection = sorted(list(set(DEData[2]) & set(BinData[2])))
 
 
@@ -366,7 +372,8 @@ def main(argv):
 
 	# Perform standard analysis
 	print('Performing DTO analysis')
-	fileName = "../Results/output.csv"
+	# fileName = "../Results/output.csv"
+	fileName = parsed.output_dir + 'output.csv'
 	with open(fileName,'a') as resultFile:
 		wr = csv.writer(resultFile)
 		wr.writerow(['TF','TFCommon','Bound Size','DE Size','Intersection','FDR Lower Bound','HypergeometricPVal','Response Rate','Relative Risk','Fold Enrichment','Jaccard Similarity','Genes'])
@@ -377,7 +384,8 @@ def main(argv):
 	if str2Bool(parsed.random)==True:
 		# Perform randomized analysis
 		print('Performing randomized DTO analysis')
-		fileName = "../Results/output_rand.csv"
+		# fileName = "../Results/output_rand.csv"
+		fileName = parsed.output_dir + 'output_rand.csv'
 		numRands = 1000
 		for TFNum in range(len(TFIntersection)):
 			for iterNum in range(numRands):
@@ -385,7 +393,7 @@ def main(argv):
 				runDualThresholds(DEData,BinData,TFIntersection,TFNum,GenesUniverse,True,iterNum)
 
 		# Compute acceptable TFs
-		computeTFs('../Results/output.csv','../Results/output_rand.csv','../Results/')
+		computeTFs(parsed.output_dir + 'output.csv',parsed.output_dir + 'output_rand.csv',parsed.output_dir)
 
 
 	# if str2Bool(parsed.random)==True:
