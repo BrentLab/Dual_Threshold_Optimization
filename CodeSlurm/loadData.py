@@ -8,26 +8,15 @@ import scipy.stats as ss
 # from collections import OrderedDict
 
 
-def createNumpyArray(dir):
-	dataFile = open(dir+'Data.csv', 'r')
-	GenesFile = open(dir+'GeneNames.csv', 'r')
-	TFsFile = open(dir+'TFNames.csv', 'r')
-
-	dataReader = csv.reader(dataFile)
-	dataData = []
-	for row in dataReader:
-		dataData.append( [ float(elem) for elem in row ] )
-
-	GenesReader = csv.reader(GenesFile)
-	GenesData = []
-	for row in GenesReader:
-		GenesData.append( [ str.strip(str(elem)) for elem in row ] )
-
-	TFsReader = csv.reader(TFsFile)
-	TFsData = []
-	for row in TFsReader:
-		TFsData.append( [ str(elem) for elem in row ][0] )
-
+def createNumpyArray(dataFile):
+	# dataData = np.loadtxt(dataDir + "Data.csv", dtype=float, delimiter=",")
+	# GenesData = np.loadtxt(dataDir + "GeneNames.csv", dtype=str, delimiter=",")
+	# TFsData = list(np.loadtxt(dataDir + "TFNames.csv", dtype=str, delimiter=","))
+	df = pd.read_csv(dataFile).rename(columns={"Unnamed: 0":"gene"})
+	GenesData = df["gene"].tolist()
+	TFsData = df.columns.tolist()
+	TFsData.remove("gene")
+	dataData = df.values[:, 1:].T.tolist()
 	return(dataData,GenesData,TFsData)
 
 def createSysDict(namesFile):
@@ -203,15 +192,3 @@ def main(argv):
 
 if __name__ == "__main__":
 	main(sys.argv)
-
-
-
-
-
-
-
-
-
-
-
-

@@ -16,22 +16,22 @@ def str2Bool(boolAsString):
 	return bool(distutils.util.strtobool(boolAsString))
 
 def parse_args(argv):
-  parser = argparse.ArgumentParser(description="")
-  parser.add_argument("-d","--de_dir")
-  parser.add_argument("-b","--bin_dir")
-  parser.add_argument("-r","--random")
-  parser.add_argument("-g","--geneNames_file")
-  parser.add_argument("-f","--sbatch_loc",default = ".")
-  parser.add_argument("-w","--rank_width",default = "1.01")
-  parser.add_argument("-o","--opt_crit",default = "pval")
-  parser.add_argument("-u","--genes_universe",default = "")
-  parser.add_argument("-a","--organism",default = "yeast")
-  parser.add_argument("-n","--rand_type",default = "split")
-  parser.add_argument("-j","--DE_decreasing")
-  parser.add_argument("-k","--Bin_decreasing")
+	parser = argparse.ArgumentParser(description="")
+	parser.add_argument("-d","--de_file")
+	parser.add_argument("-b","--bin_file")
+	parser.add_argument("-r","--random")
+	parser.add_argument("-g","--geneNames_file")
+	parser.add_argument("-f","--sbatch_loc",default = ".")
+	parser.add_argument("-w","--rank_width",default = "1.01")
+	parser.add_argument("-o","--opt_crit",default = "pval")
+	parser.add_argument("-u","--genes_universe",default = "")
+	parser.add_argument("-a","--organism",default = "yeast")
+	parser.add_argument("-n","--rand_type",default = "split")
+	parser.add_argument("-j","--DE_decreasing")
+	parser.add_argument("-k","--Bin_decreasing")
 
-  parsed = parser.parse_args(argv[1:])
-  return parsed
+	parsed = parser.parse_args(argv[1:])
+	return parsed
 
 def generateRanks(length,power,Data,threshold,decreasing):
 	rankList = []
@@ -79,7 +79,7 @@ def alignToUniverse(DEData,BinData,GenesUniverse,binIndex,DEIndex,decreasing=Tru
 	BinDataData,BinGenesData,BinTFsData = BinData
 	DEDataData,DEGenesData,DETFsData = DEData
 
-	tempGenes = BinGenesData[binIndex]
+	tempGenes = BinGenesData
 	tempData = BinDataData[binIndex]
 	for gene in GenesUniverse:
 		if gene not in tempGenes:
@@ -88,7 +88,7 @@ def alignToUniverse(DEData,BinData,GenesUniverse,binIndex,DEIndex,decreasing=Tru
 				tempData.append(0)
 			else:
 				tempData.append(1)
-	BinGenesData[binIndex] = tempGenes
+	BinGenesData = tempGenes
 	BinDataData[binIndex] = tempData
 	newBinData = BinDataData,BinGenesData,BinTFsData
 	newDEData = DEDataData,DEGenesData,DETFsData
@@ -148,6 +148,7 @@ def prepDualThresholds(TFIntersection):
 	# for i in range(5):
 	if(str2Bool(parsed.random) == False):
 		createSbatchFile(len(TFIntersection),codeDir)
+		sys.exit()
 		os.chdir(parsed.sbatch_loc)
 		for filename in os.listdir('.'):
 			os.system("sbatch "+filename)
@@ -187,7 +188,7 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 			f = open(parsed.sbatch_loc+"/runAnalysis_"+str(iterNum)+".sbatch", 'w')
 		else:
 			f = open(parsed.sbatch_loc+'/'+TF+"/runAnalysis_"+str(iterNum)+".sbatch", 'w')
-	f.write("#!/bin/sh\n")
+	f.write("#!/bin/bash\n")
 	f.write("#SBATCH -D ./\n")
 	f.write("#SBATCH --mem=2G\n")
 	if(str2Bool(parsed.random) == False):
@@ -216,12 +217,12 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 		f.write("for ID in $( seq $START $STOP ); do\n")
 
 	if(str2Bool(parsed.random) == False):
-		f.write("python " + codeDir + "/runDualThreshold.py --de_dir " + parsed.de_dir + " --bin_dir " + parsed.bin_dir + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --organism " + parsed.organism + "\n")
+		f.write("python " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --organism " + parsed.organism + "\n")
 	else:
 		if(parsed.rand_type == "global"):
-			f.write("python " + codeDir + "/runDualThreshold.py --de_dir " + parsed.de_dir + " --bin_dir " + parsed.bin_dir + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing)+ " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --organism " + parsed.organism + " --iter_num " + str(iterNum) + " --random True" + "\n")
+			f.write("python " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing)+ " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --organism " + parsed.organism + " --iter_num " + str(iterNum) + " --random True" + "\n")
 		else:
-			f.write("\tpython " + codeDir + "/runDualThreshold.py --de_dir " + parsed.de_dir + " --bin_dir " + parsed.bin_dir + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --organism " + parsed.organism + " --iter_num " + "${ID}" + " --random True" + "\n")
+			f.write("\tpython " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --organism " + parsed.organism + " --iter_num " + "${ID}" + " --random True" + "\n")
 			f.write("done\n")
 	f.close()
 
@@ -231,9 +232,9 @@ def main(argv):
 	global sysDict,parsed
 	parsed = parse_args(argv)
 
-	DEData = createNumpyArray(parsed.de_dir)
-	BinData = createNumpyArray(parsed.bin_dir)
-	sysDict = createSysDict(parsed.geneNames_file)
+	DEData = createNumpyArray(parsed.de_file)
+	BinData = createNumpyArray(parsed.bin_file)
+	# sysDict = createSysDict(parsed.geneNames_file)
 
 	TFIntersection = sorted(list(set(DEData[2]) & set(BinData[2])))
 

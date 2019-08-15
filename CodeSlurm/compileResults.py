@@ -4,7 +4,7 @@ import glob
 import argparse
 import sys
 import shutil
-sys.path.append("/scratch/mblab/pateln/ThresholdAnalysis_Python/Code")
+sys.path.append("/scratch/mblab/yiming.kang/dual_threshold_optimization/CodeSlurm/")
 from loadData import *
 from statistics import *
 from thresholdSearch import *

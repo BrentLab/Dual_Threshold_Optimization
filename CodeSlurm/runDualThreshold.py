@@ -3,7 +3,7 @@ import pandas as pd
 import argparse
 import random
 import sys
-sys.path.append("/scratch/mblab/pateln/ThresholdAnalysis_Python/Code")
+sys.path.append("/scratch/mblab/yiming.kang/dual_threshold_optimization/CodeSlurm/")
 from loadData import *
 from statistics import *
 from thresholdSearch import *
@@ -14,23 +14,23 @@ np.set_printoptions(threshold=np.nan)
 
 
 def parse_args(argv):
-  parser = argparse.ArgumentParser(description="")
-  parser.add_argument("-d","--de_dir")
-  parser.add_argument("-b","--bin_dir")
-  parser.add_argument("-r","--random",default = False)
-  parser.add_argument("-g","--geneNames_file",default = "/scratch/mblab/pateln/ThresholdAnalysis_Python/ExtraFiles/YeastCommonAndSystematicGeneNames.csv")
-  parser.add_argument("-s","--incl_spearman",default = False)
-  parser.add_argument("-n","--TF_num")
-  parser.add_argument("-o","--opt_crit",default = "pval")
-  parser.add_argument("-w","--rank_width",default = 1.01)
-  parser.add_argument("-i","--iter_num",default = "")
-  parser.add_argument("-l","--tf_list",default = "")
-  parser.add_argument("-u","--genes_universe",default = "")
-  parser.add_argument("-a","--organism",default = "yeast")
-  parser.add_argument("-j","--DE_decreasing",default = True)
-  parser.add_argument("-k","--Bin_decreasing",default = True)
-  parsed = parser.parse_args(argv[1:])
-  return parsed
+	parser = argparse.ArgumentParser(description="")
+	parser.add_argument("-d","--de_file")
+	parser.add_argument("-b","--bin_file")
+	parser.add_argument("-r","--random",default = False)
+	parser.add_argument("-g","--geneNames_file",default = "/scratch/mblab/pateln/ThresholdAnalysis_Python/ExtraFiles/YeastCommonAndSystematicGeneNames.csv")
+	parser.add_argument("-s","--incl_spearman",default = False)
+	parser.add_argument("-n","--TF_num")
+	parser.add_argument("-o","--opt_crit",default = "pval")
+	parser.add_argument("-w","--rank_width",default = 1.01)
+	parser.add_argument("-i","--iter_num",default = "")
+	parser.add_argument("-l","--tf_list",default = "")
+	parser.add_argument("-u","--genes_universe",default = "")
+	parser.add_argument("-a","--organism",default = "yeast")
+	parser.add_argument("-j","--DE_decreasing",default = True)
+	parser.add_argument("-k","--Bin_decreasing",default = True)
+	parsed = parser.parse_args(argv[1:])
+	return parsed
 
 def runDualThresholds(DEData,BinData,TFIntersection,TFNum,GenesUniverse_Given):
 	global sysDict,parsed
@@ -51,11 +51,11 @@ def runDualThresholds(DEData,BinData,TFIntersection,TFNum,GenesUniverse_Given):
 	DEDataData,DEGenesData,DETFsData = DEData
 
 	if parsed.random:
-		DEValues,DEGenes = sortDataRandom(DEDataData[DETFsData.index(TF)], DEGenesData[DETFsData.index(TF)])
+		DEValues,DEGenes = sortDataRandom(DEDataData[DETFsData.index(TF)], DEGenesData)
 	else:
-		DEValues,DEGenes = sortData(DEDataData[DETFsData.index(TF)], DEGenesData[DETFsData.index(TF)],str2Bool(parsed.DE_decreasing))
+		DEValues,DEGenes = sortData(DEDataData[DETFsData.index(TF)], DEGenesData, str2Bool(parsed.DE_decreasing))
 	
-	BinValues,BinGenes = sortData(BinDataData[BinTFsData.index(TF)], BinGenesData[BinTFsData.index(TF)],str2Bool(parsed.Bin_decreasing))
+	BinValues,BinGenes = sortData(BinDataData[BinTFsData.index(TF)], BinGenesData, str2Bool(parsed.Bin_decreasing))
 
 	if GenesUniverse_Given==None:
 		GenesUniverse = computeUniverse(DEGenes,BinGenes)
@@ -205,8 +205,8 @@ def main(argv):
 	global sysDict,parsed
 	parsed = parse_args(argv)
 
-	DEData = createNumpyArray(parsed.de_dir)
-	BinData = createNumpyArray(parsed.bin_dir)
+	DEData = createNumpyArray(parsed.de_file)
+	BinData = createNumpyArray(parsed.bin_file)
 	sysDict = createSysDict(parsed.geneNames_file)
 	TFIntersection = sorted(list(set(DEData[2]) & set(BinData[2])))
 
