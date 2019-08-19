@@ -1,99 +1,68 @@
-import numpy as np
+import sys
 import pandas as pd
 import argparse
-import random
-import sys
-from loadData import *
-from statistics import *
-from thresholdSearch import *
-from compileResults import *
-from scipy.stats import hypergeom,spearmanr
-from datetime import datetime
 
 def parse_args(argv):
   parser = argparse.ArgumentParser(description="")
-  parser.add_argument("-d","--data_file")
-  parser.add_argument("-r","--rand_file")
-  parser.add_argument("-o","--output_dir")
-  parser.add_argument("-t","--threshold",default = 0.01)
+  parser.add_argument("-d", "--data_file")
+  parser.add_argument("-r", "--rand_file")
+  parser.add_argument("-o", "--output_dir")
+  parser.add_argument("-t", "--threshold", default = 0.01)
   parsed = parser.parse_args(argv[1:])
   return parsed
 
-def computeCutoff(pVals):
+def computeCutoff(pVals, threshold):
 	if len(pVals) < 10:
 		return 0.00001
-	position = int(round(len(pVals)*parsed.threshold))
-	sortedPVals = sorted(pVals)
-	cutoff = sortedPVals[position]
-	return cutoff
+	position = int(round(len(pVals) * threshold))
+	return sorted(pVals)[position]
 
-def computeEdges(acceptableTFs):
-	edges = []
-	for TFData in acceptableTFs:
-		TF = TFData[0]
-		genesList = TFData[-1]
-		genes = genesList.split('\'')[1::2];
+def computeEdges(df):
+	edges_df = pd.DataFrame(columns=["TF","Gene"])
+	for _, row in df.iterrows():
+		TF = row["TF"]
+		genes = row["Genes"].split('\'')[1::2]
 		for gene in genes:
-			edges.append([TF,gene])
-
-	return edges
+			edges_df = edges_df.append(pd.Series({"TF": TF, "Gene": gene}),
+										ignore_index=True)
+	return edges_df
 
 
 def main(argv):
-	global sysDict,parsed
 	parsed = parse_args(argv)
 
-	acceptableTFs = []
-	cutoffs = []
-	randData = []
-	RandFile = open(parsed.rand_file, 'r')
-	randFileReader = csv.reader(RandFile)
-	for row in randFileReader:
-		randData.append(row[0:2])
+	acceptableTFsIdx = []
+	cutoffs_df = pd.DataFrame(columns=["TF", "HypergeometricPValCutoff"])
+	data_df = pd.read_csv(parsed.data_file)
+	rand_df = pd.read_csv(parsed.rand_file, names=["TF", "PVal"])
+	for i, row in data_df.iterrows():
+		TF = row["TF"]
+		randPVals = rand_df.loc[rand_df["TF"] == TF, "PVal"].values
+		cutoff = computeCutoff(randPVals, parsed.threshold)
+		cutoffs_df = cutoffs_df.append(pd.Series({"TF": TF, 
+									"HypergeometricPValCutoff": cutoff}), 
+									ignore_index=True)
+		print("%.2e, %.2e; %.2e, .2" % (row["HypergeometricPVal"], cutoff, row["FDR Lower Bound"]))
+		if i > 4:
+			sys.exit()
+		if(row["HypergeometricPVal"] < cutoff and row["FDR Lower Bound"] <= 0.2):
+			acceptableTFsIdx.append(i)
 
-	df = pd.DataFrame(randData,columns=['TF','PVal'])
+	acceptableTFs_df = data_df.iloc[acceptableTFsIdx]
+	edges_df = computeEdges(acceptableTFs_df)
+	targets_df = pd.DataFrame({"Network_targets": sorted(pd.unique(edges_df["Gene"]))})
 
-	# Reading in the output file
-	outputFile = open(parsed.data_file, 'r')
-	outputFileReader = csv.reader(outputFile)
-	acceptableTFs.append(outputFileReader.next()) #skips header row
-	for row in outputFileReader:
-		TF = row[0]
-		HyperPVal = float(row[6])
-		FDR = float(row[5])
-		locs = df.loc[df['TF'] == TF]
-		pValsList = locs['PVal'].values.tolist()
-		pVals = [float(num) for num in pValsList]
-		cutoff = computeCutoff(pVals)
-		cutoffs.append([TF,cutoff])
-		if(HyperPVal < cutoff and FDR <= 0.2):
-			acceptableTFs.append(row)
+	if not os.path.exists(parsed.output_dir):
+		os.makedirs(parsed.output_dir)
+	acceptableTFs_df.to_csv(parsed.output_dir + "/acceptableTFs.csv", index=False)
+	cutoffs_df.to_csv(parsed.output_dir + "/TFcutoffs.csv", index=False)
+	edges_df.to_csv(parsed.output_dir + "/edges.csv", index=False)
+	targets_df.to_csv(parsed.output_dir + "/targets.csv", index=False)
 
-	edges = computeEdges(acceptableTFs)
-	uniqueGenes = list(set([row[1] for row in edges]))
-	uniqueGenes = [[row] for row in uniqueGenes]
-
-	with open(parsed.output_dir+"acceptableTFs.csv", 'w') as writeFile:
-		writer = csv.writer(writeFile)
-		writer.writerows(acceptableTFs)
-
-	with open(parsed.output_dir+"TFcutoffs.csv", 'w') as writeFile:
-		writer = csv.writer(writeFile)
-		writer.writerows(cutoffs)
-
-	with open(parsed.output_dir+"edges.csv", 'w') as writeFile:
-		writer = csv.writer(writeFile)
-		writer.writerows(edges)
-
-	with open(parsed.output_dir+"targets.csv", 'w') as writeFile:
-		writer = csv.writer(writeFile)
-		writer.writerows(uniqueGenes)
-
-	with open(parsed.output_dir+'summary.txt','w')  as writeFile:
-		writeFile.write("Number of acceptableTFs: "+str(len(acceptableTFs)-1))
-		writeFile.write("\nNumber of Edges: "+str(len(edges)-1))
-		writeFile.write("\nNumber of Unique Targets: "+str(len(uniqueGenes)-1))
-
+	with open(parsed.output_dir+'/summary.txt','w') as f:
+		f.write("Number of acceptableTFs: %d" % acceptableTFs_df.shape[0])
+		f.write("\nNumber of Edges: %d" % edges_df.shape[0])
+		f.write("\nNumber of Unique Targets: %s" % targets_df.shape[0])
 
 if __name__ == "__main__":
 	main(sys.argv)

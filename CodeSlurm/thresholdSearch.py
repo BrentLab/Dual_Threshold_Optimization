@@ -6,6 +6,7 @@ import argparse
 import sys
 import random
 import os
+import glob
 from scipy.stats import hypergeom,spearmanr,rankdata
 from datetime import datetime
 import distutils.core
@@ -148,9 +149,9 @@ def prepDualThresholds(TFIntersection):
 	# for i in range(5):
 	if(str2Bool(parsed.random) == False):
 		createSbatchFile(len(TFIntersection),codeDir)
-		sys.exit()
 		os.chdir(parsed.sbatch_loc)
-		for filename in os.listdir('.'):
+		os.makedirs('log')
+		for filename in glob.glob('*.sbatch'):
 			os.system("sbatch "+filename)
 	else:
 		if(parsed.rand_type == "global"):
@@ -158,7 +159,8 @@ def prepDualThresholds(TFIntersection):
 			for iterNum in range(numIterations):
 				createSbatchFile(len(TFIntersection),codeDir,iterNum,numIterations)
 			os.chdir(parsed.sbatch_loc)
-			for filename in os.listdir('.'):
+			os.makedirs('log')
+			for filename in glob.glob('*.sbatch'):
 				os.system("sbatch "+filename)
 		else:
 			for TFNum in range(len(TFIntersection)):
@@ -166,7 +168,8 @@ def prepDualThresholds(TFIntersection):
 				os.makedirs(parsed.sbatch_loc+TF)
 				createSbatchFile(1000,codeDir,1,1,TFNum,TF)
 				os.chdir(parsed.sbatch_loc+'/'+TF)
-				for filename in os.listdir('.'):
+				os.makedirs('log')
+				for filename in glob.glob('*.sbatch'):
 					os.system("sbatch "+filename)
 				os.chdir(codeDir)
 
@@ -193,14 +196,14 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 	f.write("#SBATCH --mem=2G\n")
 	if(str2Bool(parsed.random) == False):
 		f.write("#SBATCH -J "+jobName+"\n")
-		f.write("#SBATCH -o "+jobName+".out\n")
-		f.write("#SBATCH -e "+jobName+".err\n")
+		f.write("#SBATCH -o log/"+jobName+".out\n")
+		f.write("#SBATCH -e log/"+jobName+".err\n")
 		f.write("#SBATCH --array=0-"+str(numTFs)+"%50\n")
 		f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
 	else:
 		f.write("#SBATCH -J "+jobName+"_"+str(iterNum)+"\n")
-		f.write("#SBATCH -o "+jobName+"_"+str(iterNum)+".out\n")
-		f.write("#SBATCH -e "+jobName+"_"+str(iterNum)+".err\n")
+		f.write("#SBATCH -o log/"+jobName+"_"+str(iterNum)+".out\n")
+		f.write("#SBATCH -e log/"+jobName+"_"+str(iterNum)+".err\n")
 		if(parsed.rand_type == "global"):
 			f.write("#SBATCH --array=0-"+str(numTFs)+"%"+str(100/numIters)+"\n")
 			f.write("ID=${SLURM_ARRAY_TASK_ID}\n")

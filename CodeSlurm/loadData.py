@@ -9,9 +9,6 @@ import scipy.stats as ss
 
 
 def createNumpyArray(dataFile):
-	# dataData = np.loadtxt(dataDir + "Data.csv", dtype=float, delimiter=",")
-	# GenesData = np.loadtxt(dataDir + "GeneNames.csv", dtype=str, delimiter=",")
-	# TFsData = list(np.loadtxt(dataDir + "TFNames.csv", dtype=str, delimiter=","))
 	df = pd.read_csv(dataFile).rename(columns={"Unnamed: 0":"gene"})
 	GenesData = df["gene"].tolist()
 	TFsData = df.columns.tolist()

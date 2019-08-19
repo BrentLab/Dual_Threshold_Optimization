@@ -1,8 +1,9 @@
+import os
+import sys
 import numpy as np
 import pandas as pd
 import glob
 import argparse
-import sys
 import shutil
 sys.path.append("/scratch/mblab/yiming.kang/dual_threshold_optimization/CodeSlurm/")
 from loadData import *
@@ -14,8 +15,9 @@ csv.field_size_limit(sys.maxsize)
 
 def parse_args(argv):
   parser = argparse.ArgumentParser(description="")
-  parser.add_argument("-d","--csv_dir")
-  parser.add_argument("-n","--rand_type",default = "global")
+  parser.add_argument("-i", "--input_dir")
+  parser.add_argument("-o", "--output_file")
+  parser.add_argument("-r", "--rand_type", default="global")
   parsed = parser.parse_args(argv[1:])
   return parsed
 
@@ -207,58 +209,20 @@ def main(argv):
 	parsed = parse_args(argv)
 
 	if parsed.rand_type == "global":
-		os.chdir(parsed.csv_dir)
-		fileName = os.path.basename(os.getcwd())+'.csv'
-		fout=open(fileName,"a")
-		# fout.write("'TF','TFCommon','Bound Size','DE Size','Intersection','HypergeometricPVal','Response Rate','Relative Risk','Fold Enrichment','Spearman Correlation','Spearman PVal','Jaccard Similarity','Genes'\n")
-		fout.write("'TF','TFCommon','Bound Size','DE Size','Intersection','FDR Lower Bound','HypergeometricPVal','Response Rate','Relative Risk','Fold Enrichment','Jaccard Similarity','Genes'\n")
-		for file in glob.glob("*.csv"):
-			if file != fileName:
-				for line in open(file):
-					fout.write(line)
-		fout.close()
+		header = ['TF','TFCommon','Bound Size','DE Size','Intersection',
+				'FDR Lower Bound','HypergeometricPVal','Response Rate',
+				'Relative Risk','Fold Enrichment','Jaccard Similarity','Genes']
+		os.system("echo %s >> %s" % (",".join(header), parsed.output_file))
+		for csvFile in glob.glob("%s/*.csv" % parsed.input_dir):
+			os.system("cat %s >> %s" %(csvFile, parsed.output_file))
 
-		test = os.listdir(os.getcwd())
-		os.mkdir("./Out Files")
-		os.mkdir("./Err Files")
-		os.mkdir("./Sbatch Files")
-		os.mkdir("./CSV Files")
-		for item in test:
-			if item.endswith(".out"):
-				shutil.move("./" + item , "./Out Files/" + item)
-			elif item.endswith(".err"):
-				shutil.move("./" + item , "./Err Files/" + item)
-			elif item.endswith(".sbatch"):
-				shutil.move("./" + item , "./Sbatch Files/" + item)
-			elif item.endswith(".csv"):
-				shutil.move("./" + item , "./CSV Files/" + item)
-
-		shutil.move("./CSV Files/"+fileName, "./"+fileName)#results.csv")
 	else:
-		os.chdir(parsed.csv_dir)
-		TFDirs = os.listdir(os.getcwd())
-		fileName = os.path.basename(os.getcwd())+'.csv'
-		# fout=open(fileName,"a")
-		# fout.write("'TF','HypergeometricPVal'\n")
+		TFDirs = glob.glob("%s/*/" % parsed.input_dir)
+		for i, TFDir in enumerate(TFDirs):
+			sys.stdout.write("%d " % (i+1))
+			for csvFile in glob.glob("%s/*.csv" % TFDir):
+				os.system("cut -d',' -f1,7 %s >> %s" % (csvFile, parsed.output_file))
 
-		randData = []
-		for TFDir in TFDirs:
-			os.chdir(os.getcwd()+'/'+TFDir)
-			CSVFiles = glob.glob('*.csv')
-			for file in CSVFiles:
-				RandFile = open(file, 'r')
-				fileReader = csv.reader(RandFile)
-				for row in fileReader:
-					randData.append([row[0],row[6]])
-			
-			os.chdir('..')
-
-		with open(fileName, 'w') as writeFile:
-			writer = csv.writer(writeFile)
-			writer.writerows(randData)
-
-
-		# fileName = os.path.basename(os.getcwd())+'.csv'
 
 if __name__ == "__main__":
 	main(sys.argv)
