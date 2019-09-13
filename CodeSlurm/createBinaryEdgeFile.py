@@ -4,8 +4,6 @@ import argparse
 import random
 import sys
 from loadData import *
-from statistics import *
-from thresholdSearch import *
 from compileResults import *
 from scipy.stats import hypergeom,spearmanr
 from datetime import datetime

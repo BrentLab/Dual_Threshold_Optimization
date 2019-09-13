@@ -1,8 +1,7 @@
-from thresholdSearch import *
 import numpy as np
 import pandas as pd
 import sys
-from scipy.stats import hypergeom,spearmanr
+from scipy.stats import hypergeom
 
 def computeHyperPVal(GenesIntersection,GenesUniverse,DESubGenes,boundSubGenes):
 	pval = hypergeom.sf(len(GenesIntersection)-1, len(GenesUniverse), len(DESubGenes), len(boundSubGenes))
@@ -28,15 +27,6 @@ def computeRelativeRisk(GenesIntersection,GenesUniverse,DESubGenes,boundSubGenes
 		return np.log2(responseRate/unboundResponsive)
 	else:
 		return "NA"
-
-def computeSpearman(boundSubPVals,boundSubGenes,DESubPVals,DESubGenes,GenesIntersection):
-	DEPVals,DEGenes = getSubset(DESubGenes,DESubPVals,GenesIntersection)
-	BinPVals,BinGenes = getSubset(boundSubGenes,boundSubPVals,GenesIntersection)
-	DEPVals,DEGenes = sortDataGenes(DEPVals,DEGenes)
-	BinPVals,BinGenes = sortDataGenes(BinPVals,BinGenes)
-	# pass in pvalues sorted alphabetically by gene name
-	rho,pval = spearmanr(BinPVals,DEPVals)
-	return(rho,pval)
 
 # from https://dataconomy.com/2015/04/implementing-the-five-most-popular-similarity-measures-in-python/
 def computeJaccardSimilarity(DEGenes,BoundGenes):

@@ -1,4 +1,5 @@
 import sys
+import os
 import pandas as pd
 import argparse
 
@@ -42,9 +43,6 @@ def main(argv):
 		cutoffs_df = cutoffs_df.append(pd.Series({"TF": TF, 
 									"HypergeometricPValCutoff": cutoff}), 
 									ignore_index=True)
-		print("%.2e, %.2e; %.2e, .2" % (row["HypergeometricPVal"], cutoff, row["FDR Lower Bound"]))
-		if i > 4:
-			sys.exit()
 		if(row["HypergeometricPVal"] < cutoff and row["FDR Lower Bound"] <= 0.2):
 			acceptableTFsIdx.append(i)
 
@@ -60,9 +58,9 @@ def main(argv):
 	targets_df.to_csv(parsed.output_dir + "/targets.csv", index=False)
 
 	with open(parsed.output_dir+'/summary.txt','w') as f:
-		f.write("Number of acceptableTFs: %d" % acceptableTFs_df.shape[0])
-		f.write("\nNumber of Edges: %d" % edges_df.shape[0])
-		f.write("\nNumber of Unique Targets: %s" % targets_df.shape[0])
+		f.write("Number of acceptableTFs: %d\n" % acceptableTFs_df.shape[0])
+		f.write("Number of Edges: %d\n" % edges_df.shape[0])
+		f.write("Number of Unique Targets: %s\n" % targets_df.shape[0])
 
 if __name__ == "__main__":
 	main(sys.argv)

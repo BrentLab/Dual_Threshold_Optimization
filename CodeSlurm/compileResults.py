@@ -5,7 +5,6 @@ import pandas as pd
 import glob
 import argparse
 import shutil
-sys.path.append("/scratch/mblab/yiming.kang/dual_threshold_optimization/CodeSlurm/")
 from loadData import *
 from statistics import *
 from thresholdSearch import *
