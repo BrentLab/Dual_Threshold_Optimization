@@ -20,6 +20,27 @@ def parse_args(argv):
   parsed = parser.parse_args(argv[1:])
   return parsed
 
+
+def main(argv):
+	global parsed
+	parsed = parse_args(argv)
+
+	if parsed.rand_type == "global":
+		header = ['TF','TFCommon','Bound Size','DE Size','Intersection',
+				'FDR Lower Bound','HypergeometricPVal','Response Rate',
+				'Relative Risk','Fold Enrichment','Jaccard Similarity','Genes']
+		os.system("echo %s >> %s" % (",".join(header), parsed.output_file))
+		for csvFile in glob.glob("%s/*.csv" % parsed.input_dir):
+			os.system("cat %s >> %s" %(csvFile, parsed.output_file))
+
+	else:
+		TFDirs = glob.glob("%s/*/" % parsed.input_dir)
+		for i, TFDir in enumerate(TFDirs):
+			sys.stdout.write("%d " % (i+1))
+			for csvFile in glob.glob("%s/*.csv" % TFDir):
+				os.system("cut -d',' -f1,7 %s >> %s" % (csvFile, parsed.output_file))
+
+
 def compileTargetsFixed(loc):
 	resultsFile = open(loc, 'r')
 	resultsReader = csv.reader(resultsFile)
@@ -201,26 +222,6 @@ def compileTargetIntersection(loc1,loc2,name1="Harbison v Kemmeren",name2="Harbi
 	print()
 	print("Number of Acceptable TFs with smaller pVals in set 1: ",len(set1TFsBetterPVals))
 	print("Number of Acceptable TFs with smaller pVals in set 2: ",len(set2TFsBetterPVals))
-
-
-def main(argv):
-	global parsed
-	parsed = parse_args(argv)
-
-	if parsed.rand_type == "global":
-		header = ['TF','TFCommon','Bound Size','DE Size','Intersection',
-				'FDR Lower Bound','HypergeometricPVal','Response Rate',
-				'Relative Risk','Fold Enrichment','Jaccard Similarity','Genes']
-		os.system("echo %s >> %s" % (",".join(header), parsed.output_file))
-		for csvFile in glob.glob("%s/*.csv" % parsed.input_dir):
-			os.system("cat %s >> %s" %(csvFile, parsed.output_file))
-
-	else:
-		TFDirs = glob.glob("%s/*/" % parsed.input_dir)
-		for i, TFDir in enumerate(TFDirs):
-			sys.stdout.write("%d " % (i+1))
-			for csvFile in glob.glob("%s/*.csv" % TFDir):
-				os.system("cut -d',' -f1,7 %s >> %s" % (csvFile, parsed.output_file))
 
 
 if __name__ == "__main__":

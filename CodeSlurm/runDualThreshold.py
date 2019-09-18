@@ -15,6 +15,8 @@ from statistics import *
 np.set_printoptions(threshold=np.nan)
 
 
+EPSILON = 10**(-5)
+
 def parse_args(argv):
 	parser = argparse.ArgumentParser(description="")
 	parser.add_argument("-d","--de_file")
@@ -66,9 +68,9 @@ def alignToUniverse(data, GenesUniverse, decreasing=True):
 	nUnivGenes = len(GenesUniverse)
 	##TODO: double check the validity of setting zeros or ones
 	if decreasing:
-		values2 = np.ones(nUnivGenes) * max(values)
+		values2 = np.ones(nUnivGenes) * (max(values) + EPSILON)
 	else:
-		values2 = np.ones(nUnivGenes) * min(values)
+		values2 = np.ones(nUnivGenes) * (min(values) - EPSILON)
 	for i,gene in enumerate(GenesUniverse):
 		if gene in genes:
 			j = genes.index(gene)
@@ -213,6 +215,9 @@ def optimizeThresholds(DEData, BinData, GenesUniverse):
 	# 	elif optCrit=="js":
 	# 		if jaccardSim > bestJS:
 	# 			updateBest = True
+
+	np.savetxt("../tmp_stats.txt", np.array(stats), delimiter="\t")
+	sys.exit()
 	idx = np.nanargmin(np.array(stats)[:,0])
 	bestStat, bestBinThresh, bestDEThresh = stats[idx]
 
@@ -259,7 +264,7 @@ def calculateStat(threshTuple):
 			stat = computeJaccardSimilarity(DESubGenes,boundSubGenes)
 	else:
 		stat = np.nan
-	return (stat, binThresh, DEThresh)
+	return (stat, binThresh, DEThresh, len(GenesIntersection))
 
 
 def main(argv):
