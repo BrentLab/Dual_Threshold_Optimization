@@ -66,7 +66,6 @@ def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False):
 def alignToUniverse(data, GenesUniverse, decreasing=True):
 	values, genes, TF = data
 	nUnivGenes = len(GenesUniverse)
-	##TODO: double check the validity of setting zeros or ones
 	if decreasing:
 		values2 = np.ones(nUnivGenes) * (max(values) + EPSILON)
 	else:
@@ -88,7 +87,7 @@ def runDualThresholds(DEData, BinData):
 
 	GenesUniverse = sorted(DEData[1])
 	optimizedResults = optimizeThresholds(DEData, BinData, GenesUniverse)
-	print(optimizedResults[:-1])
+	print("Optimized results = %s" % optimizedResults[:-1])
 
 	if parsed.random_iter >= 0:
 		fileName = TF + "_" + str(parsed.random_iter) + ".csv"
@@ -96,7 +95,6 @@ def runDualThresholds(DEData, BinData):
 		fileName = TF + ".csv"
 	with open(fileName,'w') as resultFile:
 		wr = csv.writer(resultFile)
-		print(optimizedResults)
 		wr.writerow(optimizedResults)
 
 
@@ -108,16 +106,15 @@ def sortData(Data, decreasing=True):
 
 def randomizeData(Data, randSeed=0):
 	values, genes, TF = Data
-	combined = list(zip(values, genes))
 	randSeed += sum([ord(x) for x in TF])
-	print(randSeed)
+	print("Random seed = %d" % randSeed)
 	random.seed(randSeed)
+	combined = list(zip(values, genes))
 	random.shuffle(combined)
 	values, genes = zip(*combined)
 	return (np.array(values), np.array(genes), TF)
 
 
-# def generateRanks(length,scaler,Data,threshold,decreasing):
 def generateRanks(values, scaler, threshold, decreasing):
 	valuesLength = len(values)
 	rankList = []
@@ -216,8 +213,6 @@ def optimizeThresholds(DEData, BinData, GenesUniverse):
 	# 		if jaccardSim > bestJS:
 	# 			updateBest = True
 
-	np.savetxt("../tmp_stats.txt", np.array(stats), delimiter="\t")
-	sys.exit()
 	idx = np.nanargmin(np.array(stats)[:,0])
 	bestStat, bestBinThresh, bestDEThresh = stats[idx]
 
@@ -264,7 +259,7 @@ def calculateStat(threshTuple):
 			stat = computeJaccardSimilarity(DESubGenes,boundSubGenes)
 	else:
 		stat = np.nan
-	return (stat, binThresh, DEThresh, len(GenesIntersection))
+	return (stat, binThresh, DEThresh)
 
 
 def main(argv):
