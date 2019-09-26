@@ -63,29 +63,32 @@ def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False):
 	return (values.tolist(), genes.tolist(), targetedTF)
 
 
-def alignToUniverse(data, GenesUniverse, decreasing=True):
+# def alignToUniverse(data, GenesUniverse, decreasing=True):
+# 	values, genes, TF = data
+# 	nUnivGenes = len(GenesUniverse)
+# 	if decreasing:
+# 		values2 = np.ones(nUnivGenes) * (max(values) + EPSILON)
+# 	else:
+# 		values2 = np.ones(nUnivGenes) * (min(values) - EPSILON)
+# 	for i,gene in enumerate(GenesUniverse):
+# 		if gene in genes:
+# 			j = genes.index(gene)
+# 			values2[i] = values[j]
+# 	return (list(values2), GenesUniverse, TF)
+def alignToUniverse(data, GenesUniverse):
 	values, genes, TF = data
-	nUnivGenes = len(GenesUniverse)
-	if decreasing:
-		values2 = np.ones(nUnivGenes) * (max(values) + EPSILON)
-	else:
-		values2 = np.ones(nUnivGenes) * (min(values) - EPSILON)
-	for i,gene in enumerate(GenesUniverse):
-		if gene in genes:
-			j = genes.index(gene)
-			values2[i] = values[j]
-	return (list(values2), GenesUniverse, TF)
+	idx = [i for i,x in enumerate(genes) if x in GenesUniverse]
+	return (list(np.array(values)[idx]), list(np.array(genes)[idx]), TF)
 
 
-def runDualThresholds(DEData, BinData):
-	TF = DEData[-1]
+def runDualThresholds(DEData, BinData, GenesUniverse):
+	TF = DEData[2]
 	if parsed.random_iter:
 		DEData = randomizeData(DEData, randSeed=parsed.random_iter)
 	else:
 		DEData = sortData(DEData, str2Bool(parsed.DE_decreasing))
 	BinData = sortData(BinData, str2Bool(parsed.Bin_decreasing))
 
-	GenesUniverse = sorted(DEData[1])
 	optimizedResults = optimizeThresholds(DEData, BinData, GenesUniverse)
 	print("Optimized results = %s" % optimizedResults[:-1])
 
@@ -120,7 +123,7 @@ def generateRanks(values, scaler, threshold, decreasing):
 	rankList = []
 	currRank = 1
 	if decreasing==True:
-		newRankedData = [-1*num for num in values]
+		newRankedData = -values
 		while(currRank < valuesLength):
 			if values[int(currRank)] > threshold and values[int(currRank)]!=0:
 				rankList.append(int(currRank))
@@ -153,6 +156,7 @@ def optimizeThresholds(DEData, BinData, GenesUniverse):
 	else:
 		TFCommon = TF
 
+	## TODO: expose response and binding threshold 
 	if str2Bool(parsed.DE_decreasing):
 		DE_threshold = 0
 	else: 
@@ -178,7 +182,7 @@ def optimizeThresholds(DEData, BinData, GenesUniverse):
 
 	bestDEThresh = DErankList[0] if len(DErankList) > 0 else 0
 	bestBinThresh = binRankList[0] if len(binRankList) > 0 else 0
-	
+
 	comboRankList = list(itertools.product(binRankList, DErankList))
 	pool = mp.Pool(8)
 	stats = pool.map(calculateStat, comboRankList)
@@ -283,11 +287,11 @@ def main(argv):
 		GenesUniverse = sorted(set(DEData[1]) & set(BinData[1]))
 	else:
 		GenesUniverse = sorted(list(np.loadtxt(parsed.genes_universe, dtype=str)))
-	DEData = alignToUniverse(DEData, GenesUniverse, parsed.DE_decreasing)
-	BinData = alignToUniverse(BinData, GenesUniverse, parsed.Bin_decreasing)
+	DEData = alignToUniverse(DEData, GenesUniverse)
+	BinData = alignToUniverse(BinData, GenesUniverse)
 
 	## Run dual threshold optimization
-	runDualThresholds(DEData, BinData)
+	runDualThresholds(DEData, BinData, GenesUniverse)
 	print("Elapsed: %.5f" % (time.time() - tStart))
 
 
