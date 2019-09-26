@@ -9,6 +9,7 @@ def parse_args(argv):
   parser.add_argument("-r", "--rand_file")
   parser.add_argument("-o", "--output_dir")
   parser.add_argument("-t", "--threshold", default = 0.01)
+  parser.add_argument("-l", "--tf_list_file", default=None)
   parsed = parser.parse_args(argv[1:])
   return parsed
 
@@ -32,12 +33,18 @@ def computeEdges(df):
 def main(argv):
 	parsed = parse_args(argv)
 
+	tf_list = None
+	if parsed.tf_list_file is not None:
+		tf_list = pd.read_csv(parsed.tf_list_file, delimiter="\t")["SysName"].values
+
 	acceptableTFsIdx = []
 	cutoffs_df = pd.DataFrame(columns=["TF", "HypergeometricPValCutoff"])
 	data_df = pd.read_csv(parsed.data_file)
 	rand_df = pd.read_csv(parsed.rand_file, names=["TF", "PVal"])
 	for i, row in data_df.iterrows():
 		TF = row["TF"]
+		if (tf_list is not None) and (TF not in tf_list):
+			continue
 		randPVals = rand_df.loc[rand_df["TF"] == TF, "PVal"].values
 		cutoff = computeCutoff(randPVals, parsed.threshold)
 		cutoffs_df = cutoffs_df.append(pd.Series({"TF": TF, 
