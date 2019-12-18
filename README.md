@@ -1,20 +1,22 @@
 # Dual Threshold Optimzation (DTO)
 Dual Threshold Optimization (DTO) is a method that sets the thresholds for TF binding and TF-perturbation response by considering both data sets together. DTO chooses, for each TF, the pair of (binding, response) thresholds that minimizes the probability that the overlap between the bound and responsive sets results from random gene selection
 
-### Package requirement
+### Requirement
+#### 1. Python libraries
 Install the following Python libraries if not installed, using your favorite package management tool such `pip` or `conda`:
 ```
 pip install scipy numpy pandas
 ```
-
-### [Optional] Job queuing system requirement
-Job queuing system [SLURM](http://slurm.schedmd.com/documentation.html) is preferred to enable high-throughput computing. SLURM version tested: `slurm-wlm 17.11.7`.  
-
+#### 2. [Optional] Job queuing system
+Job queuing system [SLURM](http://slurm.schedmd.com/documentation.html) is preferred to enable high-throughput computing. SLURM version tested: 
+```
+slurm-wlm 17.11.7
+```  
 
 ### Input data
 
 ### Code usage
-####1. Run DTO on authentic datasets
+#### 1. Run DTO on authentic datasets
 ```
 python thresholdSearch.py -d <response_csv> --DE_decreasing <True/False> -b <binding_csv> --Bin_decreasing <True/False> --sbatch_loc <output_dir>/authentic_model/ --genes_universe <gene_universe_file> [--geneNames_file <gene_name_file>] [--run_local]
 ```
@@ -30,7 +32,7 @@ Optional arguments:
 - `--geneNames_file <gene_name_file>` CSV file of gene name conversion, if the systematic gene names in the data files are preferred to be converted into common gene names.
 - `--run_local` If no SLURM is available, set this flag to run DTO in serial fashion on your local machine.
 
-####2. Run DTO on randomized datasets
+#### 2. Run DTO on randomized datasets
 ```
 python thresholdSearch.py --random True -d <response_csv> --DE_decreasing <True/False> -b <binding_csv> --Bin_decreasing <True/False> --sbatch_loc <output_dir>/random_models/ --genes_universe <gene_universe_file> [--geneNames_file <gene_name_file>] [--run_local]
 ```
@@ -39,7 +41,7 @@ Required arguments:
 - `--random True` Use 'True' for running DTO on randomized input data. The DTO results on randomized data is used to create an empirical null distribution.
 - `--sbatch_loc <output_dir>/random_models/` Make a new output directory for null model output.
 
-####3. Summarize DTO results
+#### 3. Summarize DTO results
 ```
 python summarizeFinalResults.py -i <output_dir> [--run local]
 ```
