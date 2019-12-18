@@ -1,60 +1,52 @@
-README for Dual Threshold Optimization (DTO)
-*Note that these instructions are for a single CPU. If you intend to use a job management system, please refer to README_cluster.md.*
+# Dual Threshold Optimzation (DTO)
+Dual Threshold Optimization (DTO) is a method that sets the thresholds for TF binding and TF-perturbation response by considering both data sets together. DTO chooses, for each TF, the pair of (binding, response) thresholds that minimizes the probability that the overlap between the bound and responsive sets results from random gene selection
 
-**I. Prepping the data:**
-Every dataset must be organized in a single directory with the following files:
-1. TFNames.csv - a CSV file with a list of the transcription factors (or conditions) for which data is available
-2. GeneNames.csv - a CSV file containing a matrix of the genes that correspond to each score in the data matrix
-   1. Each row in this matrix corresponds to the appropriate index in the list of TFNames
-   2. Even if the data is organized with the same order of genes in each condition, the matrix must be filled with one row per TF/condition
-3. Data.csv - a CSV file containing the values that are going to be used to rank-order the genes in GeneNames.csv
-   1. Each row in this matrix corresponds to the appropriate index in the list of TFNames
-   2. The data can be of any form (Pvalue, log-fold change, etc.)
-4. Using NetProphet data:
-	The output network from NetProphet can be used easily with DTO. regulators.txt corresponds to TFNames.csv and genes.txt corresponds to GeneNames.csv after it has been copied to fill the full matrix of data. The adjcency matrix can either be converted directly to Data.csv, but often times it is desirable to restrict the number of edges to the top N edges. This can be done using computeTopNEdges() in loadData.py. Simply modify the command in the main method to adjust the input file, output directory, and the desired number of edges. This will produce the Data.csv file that can be used directly in DTO, maintaining the order of TFs and genes in the matrix. 
+### Package requirement
+Install the following Python libraries if not installed, using your favorite package management tool such `pip` or `conda`:
+```
+pip install scipy numpy pandas
+```
 
-**II. Overview of the analysis**
-1. Scripts
-   1. loadData.py - contains functions both to parse data into the appropriate format and functions used by other scripts to load saved data for analysis
-   2. runDualThreshold.py - the script that perfoms that actual dual thresholding (run by the sbatch scripts created by thresholdSearch.py)
-   3. statistics.py - contains the funtions used by runDualThreshold.py to compute various statistical measures on the subsets
-   4. computeAcceptableTFs.py - parses the results from a corresponding pair of compiled standard and randomized results and produces the following outputs:
-    1. Results for the acceptable TFs 
-    2. Target genes for the acceptable TFs
-    3. Edges for the acceptable TFs
-    4. Cutoffs for each TF from the randomizations used to determine the set of acceptable TFs
-   5. createBinaryEdgeFile.py - takes in the set of acceptable TFs from two different analyses and produces a combined set of edges for those two analyses with binary flags indicated which analyses each edge participates in
-2. The following are the parameters necessary to run a DTO analysis
-   * `-d/--de_dir`: the path to the directory containing differential expression data (must end in a forward slash)
-   * `-b/--bin_dir`: the path to the directory containing binding data (must end in a forward slash)
-   * `-z/--output_dir`: the path to the directory where you wish to send the results (must end in a forward slash)
-   * `-g/--geneNames_file`: the path to the conversion file between common and systematic names of genes for yeast
-   * `-j/--DE_decreasing`: a boolean indicating if the DE data should be ranked in increasing or decreasing order
-   * `-k/--Bin_decreasing`: a boolean indicating if the binding data should be ranked in increasing or decreasing order
-   * `-r/--random`: a boolean indicating whether this analysis should perform the randomized optimizations in addition to the standard optimization
-   * `-w/--rank_width (default = "1.01")`: a parameter used to define the resolution of the search (it is recommended to keep this at the default value)
-   * `-o/--opt_crit (default = "pval")`: a parameter used to define the paramater used for optimization (it is recommended to keep this at the default value)
-   * `-u/--genes_universe (default = "")`: the path to a file that defines the universe of genes that should be included in the analysis
-   * `-a/--organism (default = "yeast")`: a string indicating the organism that is being studied
-3. Obtaining a set of acceptable TFs using DTO requires two different analyses to be run, one of which will be randomized (done by setting the 'random' argument to 'True'. After each one has been run, the number of acceptable TFs will be computed and a final set of results produced. If you are not interested in using randomizations to determine "acceptability" of each TF, set the "random" argument to False. This will run the analysis much more quickly, but will only produce a raw output as the hypergeometric pvalue distribution will not be computed.
+### [Optional] Job queuing system requirement
+Job queuing system [SLURM](http://slurm.schedmd.com/documentation.html) is preferred to enable high-throughput computing. SLURM version tested: `slurm-wlm 17.11.7`.  
 
-**III. Running the analysis** 
-(The following steps show how to walk through each of these steps for an analysis. In this example, we will run an analysis that intersects the Harbison ChIP data with a ZEV-based NetProphet network.)
-1. Parse Harbison ChIP data into the proper format for DTO:
-	The parseData() function in loadData.py will convert a directory that contains a distinct file for each condition into the TF list and gene/data matrices necessary for DTO. To use this function, modify the skeleton in the main method, and run the script on the command line. The function takes in the following parameters:
-   1. locIn - The path to the directory of input data (each file must have the TF/condition in its name, and must be formatted as a list of genes with scores for each)
-   2. locOut - The path to the directory to output the data to
-   3. colToKeep - The column of the input files that contains the scores (it is assumed that the gene names are in column 0)
-   4. charsToDrop - The number of characters to drop from the end of the file name to describe each tf (Ex. if the file name was TFName.peaks.txt, you would enter 10 for this parameter)
-This function can handle many but not all formats of raw data. You may need to define your own function for this to ensure it matches the form described in Part I.
-2. Parse the NetProphet network into the proper form and restrict the network to the top N edges:
-	The computeTopNEdges() function in loadData.py will select the top N edges from the network and replace the rest of the edges with a 0. To use this function, modify the skeleton in the main method, and run the script on the command line. The function takes in the following parameters:
-   1. locIn - The path to the directory of input data (this is most likely the .adjmtr output file from the NetProphet output)
-   2. locOut - The path to the directory to output the data to
-   3. numEdges - The number of edges to restrict the network to
-3. Create the necessary files:
-   1. Prepare a text file with a list of all genes that are to be included in the "universe" of genes for the analysis
-   2. If running an analysis with yeast, prepare a gene conversion file with common names in column 0 and systematic names in column 1
-4. Run the analysis - modify the file paths of the following command to agree with your file structure and run it on the command line:
-	`runDualThreshold.py --de_dir home/Data/NetProphet_Z_15_45_90_150K/ --bin_dir home/Data/HarbisonYPD/ --genes_universe home/ExtraFiles/Harbison_NetProphet_Z_Universe.txt --geneNames_file home/ExtraFiles/YeastCommonAndSystematicGeneNames.csv --DE_decreasing True --Bin_decreasing False --random True`
-   * The output of running this command will appear in the "Results" directory. These should be the same as what you see in the "Expected Results".
+
+### Input data
+
+### Code usage
+####1. Run DTO on authentic datasets
+```
+python thresholdSearch.py -d <response_csv> --DE_decreasing <True/False> -b <binding_csv> --Bin_decreasing <True/False> --sbatch_loc <output_dir>/authentic_model/ --genes_universe <gene_universe_file> [--geneNames_file <gene_name_file>] [--run_local]
+```
+Required arguments:
+- `-d <response_csv>` CSV file of transcriptional response levels of TF-perturbation. The response levels are based on differential expression or DE analysis on TF-perturbed expression profile vs. pre-perturbation profile. Those levels can be represented as absolute of log fold-changes (LFCs) or p-values.
+- `-b <binding_csv>` CSV file of TF binding strengths. The binding strengths can be represented as occupancy levels of the peaks (e.g. heights of ChIP peaks) or statistical significances (e.g. p-values).
+- `--DE_decreasing <True/False>` Use 'True' if the response levels should be raneked in descending order. Use 'False' if ranked in ascending order. For example: If using LFCs, set 'True' as higher absolute LFC represents stronger response. If using p-values, set 'False' as lower p-value represents stronger response.
+- `--Bin_decreasing <True/False>` Use 'True' if the binding strengths should be ranked in descending order. Use 'False' if ranked in ascending order. For example: If using occupancy levels, set 'True' as higher occupancy level represents stronger TF binding. If using p-values, set 'False' as lower p-value represents stronger TF binding.
+- `--sbatch_loc <output_dir>/authentic_model/` Directory for output data.
+- `--genes_universe <gene_universe_file>` Gene universe list file, which contains all possible genes to be considered as the universe for calculating overlap statistics.
+
+Optional arguments: 
+- `--geneNames_file <gene_name_file>` CSV file of gene name conversion, if the systematic gene names in the data files are preferred to be converted into common gene names.
+- `--run_local` If no SLURM is available, set this flag to run DTO in serial fashion on your local machine.
+
+####2. Run DTO on randomized datasets
+```
+python thresholdSearch.py --random True -d <response_csv> --DE_decreasing <True/False> -b <binding_csv> --Bin_decreasing <True/False> --sbatch_loc <output_dir>/random_models/ --genes_universe <gene_universe_file> [--geneNames_file <gene_name_file>] [--run_local]
+```
+Required arguments:
+- Same as above, except:
+- `--random True` Use 'True' for running DTO on randomized input data. The DTO results on randomized data is used to create an empirical null distribution.
+- `--sbatch_loc <output_dir>/random_models/` Make a new output directory for null model output.
+
+####3. Summarize DTO results
+```
+python summarizeFinalResults.py -i <output_dir> [--run local]
+```
+Required arguments:
+- `-i <output_dir>` Directory of DTO results including both authentic model and randomized models.
+
+Optional arguments:
+- `--run_local` If no SLURM is available, set this flag to run DTO in serial fashion on your local machine.
+
+### Output data
