@@ -1,1 +1,9 @@
 Code*/*.pyc
+ResourcesDataframes
+Notebooks/
+Output/
+PaperFigures/
+PaperSupplementals/
+Patel*/
+venv/
+
