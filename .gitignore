@@ -1,9 +1,13 @@
-Code*/*.pyc
+Code/*.pyc
+Code/tmp/
+Job_scripts
 ResourcesDataframes
+ExtraFiles/
 Notebooks/
 Output/
 PaperFigures/
 PaperSupplementals/
 Patel*/
+archive/
 venv/
 
