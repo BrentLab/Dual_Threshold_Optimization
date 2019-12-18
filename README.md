@@ -1,5 +1,5 @@
 # Dual Threshold Optimzation (DTO)
-Dual Threshold Optimization (DTO) is a method that sets the thresholds for TF binding and TF-perturbation response by considering both data sets together. DTO chooses, for each TF, the pair of (binding, response) thresholds that minimizes the probability that the overlap between the bound and responsive sets results from random gene selection
+Dual Threshold Optimization (DTO) is a method that sets the thresholds for TF binding and TF-perturbation response by considering both data sets together. DTO chooses, for each TF, the pair of (binding, response) thresholds that minimizes the probability that the overlap between the bound and responsive sets results from random gene selection.
 
 ## Requirement
 #### 1. Python libraries
@@ -15,10 +15,10 @@ slurm-wlm 17.11.7
 
 ## Input data
 #### 1. Transcriptional responses to TF perturbation
-A data matrix of the levels of transcriptional responses to TF perturbations, where columns represent the individual perturbed TFs and rows represent the genes. Each column is expected to be the output of differential expression analysis that compares the expression profiles of TF perturbation and pre-preturbation samples. The entry can either be represented as log fold-change or p-value.
+A data matrix of the levels of transcriptional responses to TF perturbations, where columns represent the individual perturbed TFs and rows represent the genes. Each column is expected to be the output of differential expression analysis that compares the expression profiles of TF perturbation and pre-preturbation samples. The entry can either be represented as log fold-change or p-value. The file should be in CSV format with TFs as column names in the first row and genes as row names in the first column. 
 
 #### 2. TF binding strengths
-A data matrix of the binding strengths, where columns represent the individual assayed TFs and rows represent the genes. Each entry can be represented as occupancy level or statistical significance of the TF binding events occur on the gene's regulatory region (promoters and/or enhancers). For the gene that have multiple peaks at its regulatory region, you may use the sum or max of the binding strengths of those peaks.
+A data matrix of the binding strengths, where columns represent the individual assayed TFs and rows represent the genes. Each entry can be represented as occupancy level or statistical significance of the TF binding events occur on the gene's regulatory region (promoters and/or enhancers). For the gene that have multiple peaks at its regulatory region, you may use the sum or max of the binding strengths of those peaks. The file should be in CSV format with TFs as column names in the first row and genes as row names in the first column.
 
 #### Note
 - Make sure that the column names of the two datasets have the same naming scheme to allow proper pairing of the samples. For example, use systematic name for all (such as ENSG00000256223) or use common name (ZNF10).
@@ -54,6 +54,7 @@ Required arguments:
 ```
 python summarizeFinalResults.py -i <output_dir> [--run local]
 ```
+
 Required arguments:
 - `-i <output_dir>` Directory of DTO results including both authentic model and randomized models.
 
@@ -61,3 +62,7 @@ Optional arguments:
 - `--run_local` If no SLURM is available, set this flag to run DTO in serial fashion on your local machine.
 
 ## Output data
+After completing the above three steps, the DTO results are stored in a directory called `<output_dir>/summary/`. The following output files are of interest:
+- `summary.txt` Basic information of the DTO run: the numbers of TFs that have acceptable convergence, the corresponding TF-target edges and unique target genes. 
+- `edges.csv` An adjacency list of the high-confidence edges. Each row is a tuple (TF, gene) representing the edge.
+- `acceptableTFs.csv` Detailed information of the DTO run for all analyzed TFs. Each row shows the DTO results for each TF, including the Venn diagram of the TFs' target sets, FDR lower bound estimate at sensitivity of 80%, overlap statistics such as hypergeometric p-value, and a list of bound and responsive target genes.
