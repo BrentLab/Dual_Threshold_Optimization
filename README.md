@@ -1,5 +1,7 @@
 # Dual Threshold Optimzation (DTO)
-Dual Threshold Optimization (DTO) is a method that sets the thresholds for TF binding and TF-perturbation response by considering both data sets together. DTO chooses, for each TF, the pair of (binding, response) thresholds that minimizes the probability that the overlap between the bound and responsive sets results from random gene selection.
+Dual Threshold Optimization (DTO) is a method that sets the thresholds for TF binding and TF-perturbation response by considering both data sets together. DTO chooses, for each TF, the pair of (binding, response) thresholds that minimizes the probability that the overlap between the bound and responsive sets results from random gene selection. 
+
+In addition to identifying convergence of binding and response, this tool may also be extended for analyzing any pair of datasets, in which the data entries can be ranked. For example, you may identify the convergence of two RNA-seq replicates.
 
 ## Requirement
 #### 1. Python libraries
@@ -47,7 +49,7 @@ python thresholdSearch.py --random True -d <response_csv> --DE_decreasing <True/
 ```
 Required arguments:
 - Same as above, except:
-- `--random True` Use 'True' for running DTO on randomized input data. The DTO results on randomized data is used to create an empirical null distribution.
+- `--random True` Use 'True' for running DTO on randomized input data 1000 times. The DTO results on randomized data is used to create an empirical null distribution.
 - `--sbatch_loc <output_dir>/random_models/` Make a new output directory for null model output.
 
 #### 3. Summarize DTO results
@@ -65,4 +67,7 @@ Optional arguments:
 After completing the above three steps, the DTO results are stored in a directory called `<output_dir>/summary/`. The following output files are of interest:
 - `summary.txt` Basic information of the DTO run: the numbers of TFs that have acceptable convergence, the corresponding TF-target edges and unique target genes. 
 - `edges.csv` An adjacency list of the high-confidence edges. Each row is a tuple (TF, gene) representing the edge.
-- `acceptableTFs.csv` Detailed information of the DTO run for all analyzed TFs. Each row shows the DTO results for each TF, including the Venn diagram of the TFs' target sets, FDR lower bound estimate at sensitivity of 80%, overlap statistics such as hypergeometric p-value, and a list of bound and responsive target genes.
+- `acceptableTFs.csv` Detailed information of the DTO run for the TFs that have acceptable convergence. Each row shows the DTO results for each TF, including the Venn diagram of the TFs' target sets, FDR lower bound estimate at sensitivity of 80%, overlap statistics such as hypergeometric p-value, and a list of bound and responsive target genes.
+
+In addition, you may reference this file if you are interested in all TFs being analyzed:
+- `<output_dir>/authentic_model.csv` Same format as `acceptableTFs.csv.`
