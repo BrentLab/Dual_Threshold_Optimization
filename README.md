@@ -71,3 +71,5 @@ After completing the above three steps, the DTO results are stored in a director
 
 In addition, you may reference this file if you are interested in all TFs being analyzed:
 - `<output_dir>/authentic_model.csv` Same format as `acceptableTFs.csv.`
+
+## References
