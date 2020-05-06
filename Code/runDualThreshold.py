@@ -189,7 +189,6 @@ def optimizeThresholds(DEData, BinData, GenesUniverse):
 	pool.close()
 	pool.join()
 
-	##TODO: update argmin/max search
 	# updateBest = False
 	# optCrit = parsed.opt_crit
 	# if len(GenesIntersection) > 1:

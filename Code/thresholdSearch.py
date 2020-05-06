@@ -219,13 +219,10 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 		else:
 			f = open(parsed.sbatch_loc+"/"+TF+"/runAnalysis_"+str(iterNum)+".sbatch", 'w')
 	f.write("#!/bin/bash\n")
-	# f.write("#SBATCH -D ./\n")
 	f.write("#SBATCH -D "+codeDir+"\n")
 	f.write("#SBATCH --mem=2G\n")
 	if(str2Bool(parsed.random) == False):
 		f.write("#SBATCH -J "+jobName+"\n")
-		# f.write("#SBATCH -o log/"+jobName+".out\n")
-		# f.write("#SBATCH -e log/"+jobName+".err\n")
 		f.write("#SBATCH -o "+parsed.sbatch_loc +"/log/"+jobName+".out\n")
 		f.write("#SBATCH -e "+parsed.sbatch_loc +"/log/"+jobName+".err\n")
 		f.write("#SBATCH --array=0-"+str(numTFs-1)+"%50\n")
@@ -239,11 +236,6 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 			f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
 		else:
 			f.write("#SBATCH --array=0-9\n")
-		
-	# f.write("source " + codeDir + "/../venv/bin/activate\n")
-
-	# f.write("module load numpy\n")
-	# f.write("module load pandas\n\n")
 
 	if(str2Bool(parsed.random) == True and parsed.rand_type != "global"):
 		f.write("START=$(( SLURM_ARRAY_TASK_ID * 100 ))\n")
@@ -252,16 +244,17 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 		f.write("for ID in $( seq $START $STOP ); do\n")
 
 	if(str2Bool(parsed.random) == False):
-		# f.write("python " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + "\n")
-		f.write("python runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --output_dir " + parsed.sbatch_loc + "\n")
+		f.write(
+			"python runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --output_dir " + parsed.sbatch_loc + "\n")
 	else:
 		if(parsed.rand_type == "global"):
-			f.write("python " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing)+ " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --random_iter " + str(iterNum) + " --output_dir " + parsed.sbatch_loc + "\n")
+			f.write(
+				"python " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing)+ " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --random_iter " + str(iterNum) + " --output_dir " + parsed.sbatch_loc + "\n")
 		else:
-			f.write("\tpython " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --random_iter " + "${ID}" + " --output_dir " + parsed.sbatch_loc + "/" + TF + "\n")
+			f.write(
+				"\tpython " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --random_iter " + "${ID}" + " --output_dir " + parsed.sbatch_loc + "/" + TF + "\n")
 			f.write("done\n")
 	f.close()
-
 	
 
 def main(argv):
