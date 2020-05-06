@@ -12,26 +12,27 @@ from scipy.stats import rankdata
 from loadData import createSysDict
 from thresholdSearch import sysToCommon
 from statistics import *
-np.set_printoptions(threshold=np.nan)
+np.set_printoptions(threshold=sys.maxsize)
 
 
 EPSILON = 10**(-5)
 
 def parse_args(argv):
 	parser = argparse.ArgumentParser(description="")
-	parser.add_argument("-d","--de_file")
-	parser.add_argument("-b","--bin_file")
-	parser.add_argument("-g","--geneNames_file", default=None)
-	parser.add_argument("-n","--TF_num", type=int)
-	parser.add_argument("-o","--opt_crit", default="pval")
-	parser.add_argument("-w","--rank_width", type=float, default=1.01)
-	parser.add_argument("-l","--tf_list", default=None)
-	parser.add_argument("-u","--genes_universe", default=None)
-	parser.add_argument("-r","--random_iter", default=None, type=int)
+	parser.add_argument("-d", "--de_file")
+	parser.add_argument("-b", "--bin_file")
+	parser.add_argument("-g", "--geneNames_file", default=None)
+	parser.add_argument("-n", "--TF_num", type=int)
+	parser.add_argument("-o", "--opt_crit", default="pval")
+	parser.add_argument("-w", "--rank_width", type=float, default=1.01)
+	parser.add_argument("-l", "--tf_list", default=None)
+	parser.add_argument("-u", "--genes_universe", default=None)
+	parser.add_argument("-r", "--random_iter", default=None, type=int)
 	parser.add_argument("--DE_decreasing", default=True)
 	parser.add_argument("--Bin_decreasing", default=True)
 	parser.add_argument("--DE_pval_lower_bound", default=1)
 	parser.add_argument("--Bin_pval_lower_bound", default=0.1)
+	parser.add_argument("--output_dir")
 	parsed = parser.parse_args(argv[1:])
 	return parsed
 
@@ -64,22 +65,22 @@ def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False):
 	return (values.tolist(), genes.tolist(), targetedTF)
 
 
-# def alignToUniverse(data, GenesUniverse, decreasing=True):
-# 	values, genes, TF = data
-# 	nUnivGenes = len(GenesUniverse)
-# 	if decreasing:
-# 		values2 = np.ones(nUnivGenes) * (min(values) - EPSILON)
-# 	else:
-# 		values2 = np.ones(nUnivGenes) * (max(values) + EPSILON)
-# 	for i,gene in enumerate(GenesUniverse):
-# 		if gene in genes:
-# 			j = genes.index(gene)
-# 			values2[i] = values[j]
-# 	return (list(values2), GenesUniverse, TF)
-def alignToUniverse(data, GenesUniverse):
+def alignToUniverse(data, GenesUniverse, decreasing=True):
 	values, genes, TF = data
-	idx = [i for i,x in enumerate(genes) if x in GenesUniverse]
-	return (list(np.array(values)[idx]), list(np.array(genes)[idx]), TF)
+	nUnivGenes = len(GenesUniverse)
+	if decreasing:
+		values2 = np.ones(nUnivGenes) * (min(values) - EPSILON)
+	else:
+		values2 = np.ones(nUnivGenes) * (max(values) + EPSILON)
+	for i,gene in enumerate(GenesUniverse):
+		if gene in genes:
+			j = genes.index(gene)
+			values2[i] = values[j]
+	return (list(values2), GenesUniverse, TF)
+# def alignToUniverse(data, GenesUniverse):
+# 	values, genes, TF = data
+# 	idx = [i for i,x in enumerate(genes) if x in GenesUniverse]
+# 	return (list(np.array(values)[idx]), list(np.array(genes)[idx]), TF)
 
 
 def runDualThresholds(DEData, BinData, GenesUniverse):
@@ -93,10 +94,10 @@ def runDualThresholds(DEData, BinData, GenesUniverse):
 	optimizedResults = optimizeThresholds(DEData, BinData, GenesUniverse)
 	print("Optimized results = %s" % optimizedResults[:-1])
 
-	if parsed.random_iter >= 0:
-		fileName = TF + "_" + str(parsed.random_iter) + ".csv"
+	if parsed.random_iter:
+		fileName = parsed.output_dir + TF + "_" + str(parsed.random_iter) + ".csv"
 	else:
-		fileName = TF + ".csv"
+		fileName = parsed.output_dir + TF + ".csv"
 	with open(fileName,'w') as resultFile:
 		wr = csv.writer(resultFile)
 		wr.writerow(optimizedResults)
@@ -286,13 +287,14 @@ def main(argv):
 		sysDict = createSysDict(parsed.geneNames_file)
 
 	## Map datasets to common gene universe
-	GenesUniverse0 = sorted(set(DEData[1]) & set(BinData[1]))
 	if parsed.genes_universe is None or parsed.genes_universe == "":
 		GenesUniverse = sorted(set(DEData[1]) & set(BinData[1]))
 	else:
 		GenesUniverse = sorted(list(np.loadtxt(parsed.genes_universe, dtype=str)))
-	DEData = alignToUniverse(DEData, GenesUniverse)
-	BinData = alignToUniverse(BinData, GenesUniverse)
+	# DEData = alignToUniverse(DEData, GenesUniverse)
+	# BinData = alignToUniverse(BinData, GenesUniverse)
+	DEData = alignToUniverse(DEData, GenesUniverse, parsed.DE_decreasing)
+	BinData = alignToUniverse(BinData, GenesUniverse, parsed.Bin_decreasing)
 
 	## Run dual threshold optimization
 	runDualThresholds(DEData, BinData, GenesUniverse)
