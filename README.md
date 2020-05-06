@@ -4,10 +4,12 @@ Dual Threshold Optimization (DTO) is a method that sets the thresholds for TF bi
 In addition to identifying convergence of binding and response, this tool may also be extended for analyzing any pair of datasets, in which the data entries can be ranked. For example, you may identify the convergence of two RNA-seq replicates.
 
 ## Requirement
-#### 1. Python libraries
-Install the following Python libraries if not installed, using your favorite package management tool such `pip` or `conda`:
+#### 1. Virtual environment
+Create a conda virtual env ([miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://anaconda.org/anaconda/conda)) and install modules.
 ```
-pip install scipy numpy pandas
+conda create -n dto python=3.6
+conda activate dto
+conda install scipy numpy pandas multiprocessing
 ```
 #### 2. [Optional] Job queuing system
 Job queuing system [SLURM](http://slurm.schedmd.com/documentation.html) is preferred to enable high-throughput computing. SLURM version tested: 
@@ -73,3 +75,4 @@ In addition, you may reference this file if you are interested in all TFs being 
 - `<output_dir>/authentic_model.csv` Same format as `acceptableTFs.csv.`
 
 ## References
+- Kang, Y., Patel, N., Shively, C., et al. (2020). Dual threshold optimization and network inference reveal convergent evidence from TF binding locations and TF perturbation responses. Genome Research. doi: 10.1101/gr.259655.119.
