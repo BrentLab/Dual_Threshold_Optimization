@@ -95,9 +95,9 @@ def runDualThresholds(DEData, BinData, GenesUniverse):
 	print("Optimized results = %s" % optimizedResults[:-1])
 
 	if parsed.random_iter:
-		fileName = parsed.output_dir + TF + "_" + str(parsed.random_iter) + ".csv"
+		fileName = parsed.output_dir + "/" + TF + "_" + str(parsed.random_iter) + ".csv"
 	else:
-		fileName = parsed.output_dir + TF + ".csv"
+		fileName = parsed.output_dir + "/" + TF + ".csv"
 	with open(fileName,'w') as resultFile:
 		wr = csv.writer(resultFile)
 		wr.writerow(optimizedResults)
