@@ -4,21 +4,24 @@ import numpy as np
 import pandas as pd
 import argparse
 
+
 def parse_args(argv):
-  parser = argparse.ArgumentParser(description="")
-  parser.add_argument("-d", "--data_file")
-  parser.add_argument("-r", "--rand_file")
-  parser.add_argument("-o", "--output_dir")
-  parser.add_argument("-t", "--threshold", default = 0.01)
-  parser.add_argument("-l", "--tf_list_file", default=None)
-  parsed = parser.parse_args(argv[1:])
-  return parsed
+	parser = argparse.ArgumentParser(description="")
+	parser.add_argument("-d", "--data_file")
+	parser.add_argument("-r", "--rand_file")
+	parser.add_argument("-o", "--output_dir")
+	parser.add_argument("-t", "--threshold", default=0.01)
+	parser.add_argument("-l", "--tf_list_file", default=None)
+	parsed = parser.parse_args(argv[1:])
+	return parsed
+
 
 def computeCutoff(pVals, threshold):
 	if len(pVals) < 10:
 		return 0.00001
 	position = int(round(len(pVals) * threshold))
 	return sorted(pVals)[position]
+
 
 def computeEdges(df):
 	edges_df = pd.DataFrame(columns=["TF","Gene"])

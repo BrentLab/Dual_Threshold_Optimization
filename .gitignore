@@ -11,4 +11,4 @@ Patel*/
 archive/
 venv/
 .ipynb_checkpoints/
-
+__pycache__
