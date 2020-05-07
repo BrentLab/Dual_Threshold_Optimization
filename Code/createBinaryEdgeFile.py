@@ -9,12 +9,12 @@ from scipy.stats import hypergeom,spearmanr
 from datetime import datetime
 
 def parse_args(argv):
-  parser = argparse.ArgumentParser(description="")
-  parser.add_argument("-a","--edges_one")
-  parser.add_argument("-b","--edges_two")
-  parser.add_argument("-o","--output_dir")
-  parsed = parser.parse_args(argv[1:])
-  return parsed
+	parser = argparse.ArgumentParser(description="")
+	parser.add_argument("-a","--edges_one")
+	parser.add_argument("-b","--edges_two")
+	parser.add_argument("-o","--output_dir")
+	parsed = parser.parse_args(argv[1:])
+	return parsed
 
 def computeEdgeUnion(list1,list2):
 	network = list1[:]

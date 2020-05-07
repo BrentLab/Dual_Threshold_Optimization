@@ -13,12 +13,12 @@ import ast
 csv.field_size_limit(sys.maxsize)
 
 def parse_args(argv):
-  parser = argparse.ArgumentParser(description="")
-  parser.add_argument("-i", "--input_dir")
-  parser.add_argument("-o", "--output_file")
-  parser.add_argument("-r", "--rand_type", default="global")
-  parsed = parser.parse_args(argv[1:])
-  return parsed
+	parser = argparse.ArgumentParser(description="")
+	parser.add_argument("-i", "--input_dir")
+	parser.add_argument("-o", "--output_file")
+	parser.add_argument("-r", "--rand_type", default="global")
+	parsed = parser.parse_args(argv[1:])
+	return parsed
 
 
 def main(argv):
