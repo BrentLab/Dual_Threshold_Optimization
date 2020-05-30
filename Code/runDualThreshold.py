@@ -30,8 +30,8 @@ def parse_args(argv):
 	parser.add_argument("-r", "--random_iter", default=None, type=int)
 	parser.add_argument("--DE_decreasing", default=True)
 	parser.add_argument("--Bin_decreasing", default=True)
-	parser.add_argument("--DE_pval_lower_bound", default=1)
-	parser.add_argument("--Bin_pval_lower_bound", default=0.1)
+	parser.add_argument("--DE_pval_lower_bound", type=float, default=1)
+	parser.add_argument("--Bin_pval_lower_bound", type=float, default=0.1)
 	parser.add_argument("--output_dir")
 	parsed = parser.parse_args(argv[1:])
 	return parsed
