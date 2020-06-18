@@ -9,6 +9,7 @@ from scipy.stats import hypergeom,spearmanr,rankdata
 from datetime import datetime
 import distutils.core
 from loadData import *
+from runDualThreshold import *
 
 # np.set_printoptions(threshold=np.nan)
 np.set_printoptions(threshold=sys.maxsize)
@@ -46,8 +47,10 @@ def parse_args(argv):
 						help="Lower bound of binding p-values. Any genes with p-values greater than the lower bound will not be used for optimization.")
 	parser.add_argument("--run_local", action='store_true', default=False,
 						help="Flag for running DTO in serial fashion on local machine.")
+	parser.add_argument("--find_tf_specificity", default="False", help = "find where the hypergeometric p-val of TFs of interest lie in the distribution of false TF pairings.")
 	parsed = parser.parse_args(argv[1:])
 	return parsed
+
 
 def generateRanks(length,power,Data,threshold,decreasing):
 	rankList = []
@@ -198,6 +201,49 @@ def prepDualThresholds(TFIntersection, run_local=False):
 
 	os.chdir(codeDir)
 
+
+def findTfSpecificity(TFIntersection, run_local = False):
+	execution = "bash" if run_local else "sbatch"
+	codeDir = os.getcwd()
+
+	directory_DTORun = parsed.sbatch_loc + "../find_tf_specificity/"
+	if not os.path.exists(directory_DTORun):
+		os.makedirs(directory_DTORun)
+
+	createSbatchFile(len(TFIntersection),codeDir)
+	os.chdir(directory_DTORun)
+	if not os.path.exists('log'):
+		os.makedirs('log')
+	for filename in glob.glob('*.sbatch'):
+		os.system(execution+" "+filename)
+
+	
+	else:
+		if(parsed.rand_type == "global"):
+			numIterations = (1000/len(TFIntersection)) + 2
+			for iterNum in range(numIterations):
+				createSbatchFile(len(TFIntersection),codeDir,iterNum,numIterations)
+			os.chdir(parsed.sbatch_loc)
+			if not os.path.exists('log'):
+				os.makedirs('log')
+			for filename in glob.glob('*.sbatch'):
+				os.system(execution+" "+filename)
+		else:
+			for TFNum in range(len(TFIntersection)):
+				TF = TFIntersection[TFNum]
+				if not os.path.exists(parsed.sbatch_loc+TF):
+					os.makedirs(parsed.sbatch_loc+TF)
+				createSbatchFile(1000,codeDir,1,1,TFNum,TF)
+				os.chdir(parsed.sbatch_loc+'/'+TF)
+				if not os.path.exists('log'):
+					os.makedirs('log')
+				for filename in glob.glob('*.sbatch'):
+					os.system(execution+" "+filename)
+				os.chdir(codeDir)
+
+	os.chdir(codeDir)
+
+
 def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 	global parsed
 
@@ -260,12 +306,13 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 def main(argv):
 	global sysDict,parsed
 	parsed = parse_args(argv)
-
 	DEData = createNumpyArray(parsed.de_file)
 	BinData = createNumpyArray(parsed.bin_file)
 	TFIntersection = sorted(list(set(DEData[2]) & set(BinData[2])))
-
 	prepDualThresholds(TFIntersection, parsed.run_local)
+
+	if(str2Bool(parsed.random) == False and str2Bool(parsed.find_tf_specificity) == True):
+		findTfSpecificity(TFIntersection, parsed.run_local)
 
 
 if __name__ == "__main__":
