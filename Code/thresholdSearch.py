@@ -201,6 +201,9 @@ def prepDualThresholds(TFIntersection, run_local=False):
 
 	os.chdir(codeDir)
 
+########################################################
+########################################################
+########################################################
 
 def findTfSpecificity(TFIntersection, run_local = False):
 	execution = "bash" if run_local else "sbatch"
@@ -210,13 +213,13 @@ def findTfSpecificity(TFIntersection, run_local = False):
 	if not os.path.exists(directory_DTORun):
 		os.makedirs(directory_DTORun)
 
+	#Looping here -- then it is easy 
 	createSbatchFile(len(TFIntersection),codeDir)
 	os.chdir(directory_DTORun)
 	if not os.path.exists('log'):
 		os.makedirs('log')
 	for filename in glob.glob('*.sbatch'):
 		os.system(execution+" "+filename)
-
 	
 	else:
 		if(parsed.rand_type == "global"):
@@ -242,7 +245,6 @@ def findTfSpecificity(TFIntersection, run_local = False):
 				os.chdir(codeDir)
 
 	os.chdir(codeDir)
-
 
 def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 	global parsed
