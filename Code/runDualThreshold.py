@@ -35,6 +35,8 @@ def parse_args(argv):
 	parser.add_argument("--Bin_decreasing", default=True)
 	parser.add_argument("--DE_pval_lower_bound", type=float, default=1)
 	parser.add_argument("--Bin_pval_lower_bound", type=float, default=0.1)
+	parser.add_argument("--find_tf_specificity", default="False")
+	parser.add_argument("--tuple_index_false_pairing", type = int, default=0)
 	parser.add_argument("--output_dir")
 	parsed = parser.parse_args(argv[1:])
 	return parsed
@@ -45,6 +47,7 @@ def str2Bool(boolAsString):
 
 
 def getTargetedTF(DEFile, BinFile, TFNum):
+	global deTF, bindingTF
 	with open(DEFile, "r") as f:
 		DEHeader = f.readline().strip().split(",")[1:]
 	with open(BinFile, "r") as f:
@@ -52,9 +55,29 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 	TFIntersection = set(DEHeader) & set(BinHeader)
 	if parsed.tf_list is not None:
 		TFIntersection &= set(list(np.loadtxt(parsed.tf_list, dtype=str)))
-	targetedTF = sorted(TFIntersection)[TFNum]
-	DEIdx = DEHeader.index(targetedTF)
-	BinIdx = BinHeader.index(targetedTF)
+
+	if(str2Bool(parsed.find_tf_specificity) == False):
+		targetedTF = sorted(TFIntersection)[TFNum]
+		deTF = targetedTF
+		bindingTF = targetedTF
+		DEIdx = DEHeader.index(targetedTF)
+		BinIdx = BinHeader.index(targetedTF)
+
+	else:
+		targetedTF = sorted(TFIntersection)[TFNum]
+		tupleList = list(range(0,len(TFIntersection)))
+		pairingList1 = [(TFNum,val) for val in tupleList]
+		pairingList2 = [(val,TFNum) for val in tupleList]
+		false_pairing_set = pairingList1.union(pairingList2) - pairingList1.intersection(pairingList2)
+		false_pairing_list = set(false_pairing_set)
+		print(len(false_pairing_list))
+		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
+		deTF = sorted(TFIntersection)[curr_tuple[0]]
+		DEIdx = DEHeader.index(deTF)
+		bindingTF = sorted(TFIntersection)[curr_tuple[1]]
+		BinIdx = BinHeader.index(bindingTF)
+		print(str(deTF) + ":" +  str(bindingTF))
+
 	return (targetedTF, DEIdx, BinIdx)
 
 
@@ -95,16 +118,24 @@ def runDualThresholds(DEData, BinData, GenesUniverse):
 	BinData = sortData(BinData, str2Bool(parsed.Bin_decreasing))
 
 	optimizedResults = optimizeThresholds(DEData, BinData, GenesUniverse)
-	print("Optimized results = %s" % optimizedResults[:-1])
+
+	if(str2Bool(parsed.find_tf_specificity)):
+		optimizeResults = optimizedResults[:-1]
+		optimizeResults.append(deTF)
+		optimizeResults.append(bindingTF)
+		print("Optimized results = %s" % optimizedResults)
+	else:
+		print("Optimized results = %s" % optimizedResults[:-1])
 
 	if parsed.random_iter:
 		fileName = parsed.output_dir + "/" + TF + "_" + str(parsed.random_iter) + ".csv"
+
 	else:
 		fileName = parsed.output_dir + "/" + TF + ".csv"
 	with open(fileName,'w') as resultFile:
 		wr = csv.writer(resultFile)
 		wr.writerow(optimizedResults)
-
+	# elif str2Bool(parsed.find_tf_specificity:
 
 def sortData(Data, decreasing=True):
 	values, genes, TF = Data
@@ -269,10 +300,12 @@ def calculateStat(threshTuple):
 	return (stat, binThresh, DEThresh)
 
 
+#use slurm id instead of original id for TFs 
 def main(argv):
 	tStart = time.time()
 	global parsed, sysDict, GenesUniverse
 	parsed = parse_args(argv)
+	
 
 	## Load data for the targeted TF
 	targetedTF, targetedDEIdx, targetedBinIdx = \

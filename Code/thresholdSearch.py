@@ -201,52 +201,32 @@ def prepDualThresholds(TFIntersection, run_local=False):
 
 	os.chdir(codeDir)
 
-########################################################
-########################################################
-########################################################
 
 def findTfSpecificity(TFIntersection, run_local = False):
 	execution = "bash" if run_local else "sbatch"
 	codeDir = os.getcwd()
 
-	directory_DTORun = parsed.sbatch_loc + "../find_tf_specificity/"
+	if not os.path.exists(parsed.sbatch_loc):
+		os.makedirs(parsed.sbatch_loc)
+
+	directory_DTORun = parsed.sbatch_loc + "/find_tf_specificity/"
 	if not os.path.exists(directory_DTORun):
 		os.makedirs(directory_DTORun)
 
-	#Looping here -- then it is easy 
-	createSbatchFile(len(TFIntersection),codeDir)
-	os.chdir(directory_DTORun)
-	if not os.path.exists('log'):
-		os.makedirs('log')
-	for filename in glob.glob('*.sbatch'):
-		os.system(execution+" "+filename)
-	
-	else:
-		if(parsed.rand_type == "global"):
-			numIterations = (1000/len(TFIntersection)) + 2
-			for iterNum in range(numIterations):
-				createSbatchFile(len(TFIntersection),codeDir,iterNum,numIterations)
-			os.chdir(parsed.sbatch_loc)
-			if not os.path.exists('log'):
-				os.makedirs('log')
-			for filename in glob.glob('*.sbatch'):
-				os.system(execution+" "+filename)
-		else:
-			for TFNum in range(len(TFIntersection)):
-				TF = TFIntersection[TFNum]
-				if not os.path.exists(parsed.sbatch_loc+TF):
-					os.makedirs(parsed.sbatch_loc+TF)
-				createSbatchFile(1000,codeDir,1,1,TFNum,TF)
-				os.chdir(parsed.sbatch_loc+'/'+TF)
-				if not os.path.exists('log'):
-					os.makedirs('log')
-				for filename in glob.glob('*.sbatch'):
-					os.system(execution+" "+filename)
-				os.chdir(codeDir)
-
+	for TFNum in range(len(TFIntersection)):
+		TF = TFIntersection[TFNum]
+		if not os.path.exists(directory_DTORun +TF):
+			os.makedirs(directory_DTORun +TF)
+		createSbatchFile(len(TFIntersection),codeDir, "", 1,1, TFNum, TF, True)		
+		os.chdir(directory_DTORun+'/'+TF)
+		if not os.path.exists('log'):
+			os.makedirs('log')
+		for filename in glob.glob('*.sbatch'):
+			os.system(execution+" "+filename)
+		os.chdir(codeDir)
 	os.chdir(codeDir)
 
-def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
+def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Specificity = False):
 	global parsed
 
 	if parsed.genes_universe == "":
@@ -259,8 +239,10 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 		geneNames = parsed.geneNames_file
 
 	jobName = "runDTO_%A_%a"
-	if(str2Bool(parsed.random) == False):
+	if(str2Bool(parsed.random) == False and TF_Specificity = False):
 		f = open(parsed.sbatch_loc+"/runAnalysis.sbatch", 'w')
+	elif(str2Bool(parsed.random) == False and TF_Specificity = True):
+		f = open(parsed.sbatch_loc+ "/find_tf_specificity/" + TF + "/" +  "runAnalysis.sbatch", 'w')
 	else:
 		if(parsed.rand_type == "global"):
 			f = open(parsed.sbatch_loc+"/runAnalysis_"+str(iterNum)+".sbatch", 'w')
@@ -269,12 +251,22 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 	f.write("#!/bin/bash\n")
 	f.write("#SBATCH -D "+codeDir+"\n")
 	f.write("#SBATCH --mem=2G\n")
-	if(str2Bool(parsed.random) == False):
+
+	if(str2Bool(parsed.random) == False and TF_Specificity = False):
 		f.write("#SBATCH -J "+jobName+"\n")
 		f.write("#SBATCH -o "+parsed.sbatch_loc +"/log/"+jobName+".out\n")
 		f.write("#SBATCH -e "+parsed.sbatch_loc +"/log/"+jobName+".err\n")
 		f.write("#SBATCH --array=0-"+str(numTFs-1)+"%50\n")
 		f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
+
+	elif(str2Bool(parsed.random) == False and TF_Specificity = True):
+		f.write("#SBATCH -J "+jobName+"_"+str(iterNum)+"\n")
+		f.write("#SBATCH -o "+ parsed.sbatch_loc+"/find_tf_specificity/"+"/log/"+jobName+"_"+str(iterNum)+".out\n")
+		f.write("#SBATCH -e "+parsed.sbatch_loc+"/find_tf_specificity/"+"/log/"+jobName+"_"+str(iterNum)+".err\n")
+		
+		f.write("#SBATCH --array=0-"+str(numTFs*2-3)+"%200\n")
+		f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
+
 	else:
 		f.write("#SBATCH -J "+jobName+"_"+str(iterNum)+"\n")
 		f.write("#SBATCH -o "+parsed.sbatch_loc+"/"+TF+"/log/"+jobName+"_"+str(iterNum)+".out\n")
@@ -291,16 +283,21 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF=""):
 		f.write("[ \"$STOP\" -eq 999 ] && STOP=1000\n\n")
 		f.write("for ID in $( seq $START $STOP ); do\n")
 
-	if(str2Bool(parsed.random) == False):
+	if(str2Bool(parsed.random) == False and TF_Specificity = False):
 		f.write(
-			"python runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --output_dir " + parsed.sbatch_loc + "\n")
+			"python runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --output_dir " + parsed.sbatch_loc + " --find_tf_specificity " + TF_Specificity + " --tuple_index_false_pairing " + str(0)  + "\n")
+	
+	elif(str2Bool(parsed.random) == False and TF_Specificity = True):
+		f.write(
+			"python runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --output_dir " + parsed.sbatch_loc + "/find_tf_specificity/" + TF + " --find_tf_specificity " + TF_Specificity + " --tuple_index_false_pairing " + "${ID}" + "\n")
+
 	else:
 		if(parsed.rand_type == "global"):
 			f.write(
-				"python " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing)+ " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --random_iter " + str(iterNum) + " --output_dir " + parsed.sbatch_loc + "\n")
+				"python " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing)+ " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --random_iter " + str(iterNum) + " --output_dir " + parsed.sbatch_loc + " --find_tf_specificity " + TF_Specificity + " --tuple_index_false_pairing " + str(0) + "\n")
 		else:
 			f.write(
-				"\tpython " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --random_iter " + "${ID}" + " --output_dir " + parsed.sbatch_loc + "/" + TF + "\n")
+				"\tpython " + codeDir + "/runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --random_iter " + "${ID}" + " --output_dir " + parsed.sbatch_loc + "/" + TF   " --find_tf_specificity " + TF_Specificity + " --tuple_index_false_pairing " + str(0) + "\n")
 			f.write("done\n")
 	f.close()
 	
