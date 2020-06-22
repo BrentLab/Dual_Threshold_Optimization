@@ -13,8 +13,6 @@ from loadData import createSysDict
 from thresholdSearch import sysToCommon
 from statistics import *
 
-
-
 np.set_printoptions(threshold=sys.maxsize)
 
 
@@ -68,9 +66,12 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 		tupleList = list(range(0,len(TFIntersection)))
 		pairingList1 = [(TFNum,val) for val in tupleList]
 		pairingList2 = [(val,TFNum) for val in tupleList]
-		false_pairing_set = pairingList1.union(pairingList2) - pairingList1.intersection(pairingList2)
-		false_pairing_list = set(false_pairing_set)
+		set1 = set(pairingList1)
+		set2 = set(pairingList2)
+		false_pairing_set = set1.union(set2)- set1.intersection(set2)
+		false_pairing_list = list(false_pairing_set)
 		print(len(false_pairing_list))
+		print(false_pairing_list)
 		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
 		deTF = sorted(TFIntersection)[curr_tuple[0]]
 		DEIdx = DEHeader.index(deTF)
@@ -119,11 +120,12 @@ def runDualThresholds(DEData, BinData, GenesUniverse):
 
 	optimizedResults = optimizeThresholds(DEData, BinData, GenesUniverse)
 
+	#TODO: Add more items to the optimized results when tf_specificity is true
 	if(str2Bool(parsed.find_tf_specificity)):
 		optimizeResults = optimizedResults[:-1]
-		optimizeResults.append(deTF)
-		optimizeResults.append(bindingTF)
-		print("Optimized results = %s" % optimizedResults)
+		print(deTF + ": check")
+		print(bindingTF + ": check")
+		print("Optimized results+ = %s" % optimizedResults)
 	else:
 		print("Optimized results = %s" % optimizedResults[:-1])
 
@@ -207,8 +209,8 @@ def optimizeThresholds(DEData, BinData, GenesUniverse):
 								str2Bool(parsed.DE_decreasing))
 	binRankList = generateRanks(BinValues, parsed.rank_width, Bin_threshold, 
 								str2Bool(parsed.Bin_decreasing))
-	print('DE list = %s' % DErankList)
-	print('bin list = %s' % binRankList)
+	# print('DE list = %s' % DErankList)
+	# print('bin list = %s' % binRankList)
 	sys.stdout.flush()
 
 	bestIntersection = 0

@@ -224,7 +224,6 @@ def findTfSpecificity(TFIntersection, run_local = False):
 		for filename in glob.glob('*.sbatch'):
 			os.system(execution+" "+filename)
 		os.chdir(codeDir)
-	os.chdir(codeDir)
 
 def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Specificity = False):
 	global parsed
@@ -260,8 +259,8 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Speci
 
 	elif(str2Bool(parsed.random) == False and TF_Specificity == True):
 		f.write("#SBATCH -J "+jobName+"_"+str(iterNum)+"\n")
-		f.write("#SBATCH -o "+ parsed.sbatch_loc+"/find_tf_specificity/"+"/log/"+jobName+"_"+str(iterNum)+".out\n")
-		f.write("#SBATCH -e "+parsed.sbatch_loc+"/find_tf_specificity/"+"/log/"+jobName+"_"+str(iterNum)+".err\n")
+		f.write("#SBATCH -o "+ parsed.sbatch_loc+"/find_tf_specificity/"+ TF + "/log/"+jobName+"_"+str(iterNum)+".out\n")
+		f.write("#SBATCH -e "+parsed.sbatch_loc+"/find_tf_specificity/"+ TF + "/log/"+jobName+"_"+str(iterNum)+".err\n")
 		
 		f.write("#SBATCH --array=0-"+str(numTFs*2-3)+"%200\n")
 		f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
@@ -308,8 +307,8 @@ def main(argv):
 	TFIntersection = sorted(list(set(DEData[2]) & set(BinData[2])))
 	prepDualThresholds(TFIntersection, parsed.run_local)
 
-	# if(str2Bool(parsed.random) == False and str2Bool(parsed.find_tf_specificity) == True):
-	# 	findTfSpecificity(TFIntersection, parsed.run_local)
+	if(str2Bool(parsed.random) == False and str2Bool(parsed.find_tf_specificity) == True):
+		findTfSpecificity(TFIntersection, parsed.run_local)
 
 
 if __name__ == "__main__":
