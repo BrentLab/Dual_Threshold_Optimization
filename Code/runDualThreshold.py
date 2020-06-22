@@ -129,7 +129,8 @@ def runDualThresholds(DEData, BinData, GenesUniverse):
 
 	if parsed.random_iter:
 		fileName = parsed.output_dir + "/" + TF + "_" + str(parsed.random_iter) + ".csv"
-
+	elif(str2Bool(parsed.find_tf_specificity) == True):
+		fileName = parsed.output_dir + "/" + TF + "_" + str(parsed.tuple_index_false_pairing) + ".csv"
 	else:
 		fileName = parsed.output_dir + "/" + TF + ".csv"
 	with open(fileName,'w') as resultFile:
@@ -305,7 +306,6 @@ def main(argv):
 	tStart = time.time()
 	global parsed, sysDict, GenesUniverse
 	parsed = parse_args(argv)
-	
 
 	## Load data for the targeted TF
 	targetedTF, targetedDEIdx, targetedBinIdx = \
