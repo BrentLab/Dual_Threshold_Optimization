@@ -276,9 +276,16 @@ def optimizeThresholds(DEData, BinData, GenesUniverse):
 	relativeRisk = computeRelativeRisk(GenesIntersection,GenesUniverse,
 									DESubGenes,boundSubGenes)
 	jaccardSim = computeJaccardSimilarity(DESubGenes,boundSubGenes)
-	out = [TF, TFCommon, len(boundSubGenes), len(DESubGenes), len(GenesIntersection),
+
+	if(str2Bool(parsed.find_tf_specificity) == True):
+		out = [TF, TFCommon, deTF, bindingTF, len(boundSubGenes), len(DESubGenes), len(GenesIntersection),
 			FDRBound, hyperPval, responseRate, relativeRisk, 
 			foldEnrichment, jaccardSim, intersectionCommon]
+	else:
+		out = [TF, TFCommon, len(boundSubGenes), len(DESubGenes), len(GenesIntersection),
+			FDRBound, hyperPval, responseRate, relativeRisk, 
+			foldEnrichment, jaccardSim, intersectionCommon]
+	print(parsed.find_tf_specificity + "Check2")
 	return out
 
 
