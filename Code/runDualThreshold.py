@@ -68,10 +68,21 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 		pairingList2 = [(val,TFNum) for val in tupleList]
 		set1 = set(pairingList1)
 		set2 = set(pairingList2)
-		false_pairing_set = set1.union(set2)- set1.intersection(set2)
-		false_pairing_list = list(false_pairing_set)
-		print(len(false_pairing_list))
-		print(false_pairing_list)
+
+		if(len(TFIntersection) > 100):
+			set_temp1 = set1 - set1.intersection(set2)
+			list_settemp1 = list(set_temp1)
+			list_settemp1 = list_settemp1[0:100]
+
+			set_temp2 = set2 - set1.intersection(set2)
+			list_settemp2 = list(set_temp2)
+			list_settemp2 = list_settemp2[0:100]
+			false_pairing_list = list_settemp1 + list_settemp2
+
+		else:
+			false_pairing_set = set1.union(set2) - set1.intersection(set2)
+			false_pairing_list = list(false_pairing_set)
+		
 		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
 		deTF = sorted(TFIntersection)[curr_tuple[0]]
 		DEIdx = DEHeader.index(deTF)

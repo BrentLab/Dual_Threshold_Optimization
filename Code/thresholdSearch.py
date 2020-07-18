@@ -262,7 +262,10 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Speci
 		f.write("#SBATCH -o "+ parsed.sbatch_loc+"/find_tf_specificity/"+ TF + "/log/"+jobName+"_"+str(iterNum)+".out\n")
 		f.write("#SBATCH -e "+parsed.sbatch_loc+"/find_tf_specificity/"+ TF + "/log/"+jobName+"_"+str(iterNum)+".err\n")
 		
-		f.write("#SBATCH --array=0-"+str(numTFs*2-3)+"%200\n")
+		if(numTFs <= 100):
+			f.write("#SBATCH --array=0-"+str(numTFs*2-3)+"%200\n")
+		else:
+			f.write("#SBATCH --array=0-"+str(199)+"%200\n")
 		f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
 
 	else:
