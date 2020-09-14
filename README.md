@@ -9,7 +9,8 @@ Create a conda virtual env ([miniconda](https://docs.conda.io/en/latest/minicond
 ```
 conda create -n dto python=3.6
 conda activate dto
-conda install scipy numpy pandas multiprocessing
+conda install scipy numpy pandas 
+conda install -c conda-forge multiprocess
 ```
 #### 2. [Optional] Job queuing system
 Job queuing system [SLURM](http://slurm.schedmd.com/documentation.html) is preferred to enable high-throughput computing. SLURM version tested: 
