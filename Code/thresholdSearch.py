@@ -261,11 +261,11 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Speci
 		f.write("#SBATCH -J "+jobName+"_"+str(iterNum)+"\n")
 		f.write("#SBATCH -o "+ parsed.sbatch_loc+"/find_tf_specificity/"+ TF + "/log/"+jobName+"_"+str(iterNum)+".out\n")
 		f.write("#SBATCH -e "+parsed.sbatch_loc+"/find_tf_specificity/"+ TF + "/log/"+jobName+"_"+str(iterNum)+".err\n")
-		
-		if(numTFs <= 100):
+		#TODO: Change needed here
+		if(numTFs <= 75):
 			f.write("#SBATCH --array=0-"+str(numTFs*2-3)+"%200\n")
 		else:
-			f.write("#SBATCH --array=0-"+str(199)+"%200\n")
+			f.write("#SBATCH --array=0-"+str(149)+"%200\n")
 		f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
 
 	else:
@@ -283,6 +283,7 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Speci
 		f.write("STOP=$(( START + 99 ))\n")
 		f.write("[ \"$STOP\" -eq 999 ] && STOP=1000\n\n")
 		f.write("for ID in $( seq $START $STOP ); do\n")
+	
 	if(str2Bool(parsed.random) == False and TF_Specificity == False):
 		f.write(
 			"python runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + "${ID}" + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --output_dir " + parsed.sbatch_loc + "\n")

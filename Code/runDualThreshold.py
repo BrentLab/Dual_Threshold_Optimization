@@ -44,7 +44,7 @@ def str2Bool(boolAsString):
 	return bool(distutils.util.strtobool(boolAsString))
 
 
-def getTargetedTF(DEFile, BinFile, TFNum):
+def getTargetedTFUpdated(DEFile, BinFile, TFNum):
 	global deTF, bindingTF
 	with open(DEFile, "r") as f:
 		DEHeader = f.readline().strip().split(",")[1:]
@@ -63,25 +63,32 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 
 	else:
 		targetedTF = sorted(TFIntersection)[TFNum]
-		tupleList = list(range(0,len(TFIntersection)))
-		pairingList1 = [(TFNum,val) for val in tupleList]
-		pairingList2 = [(val,TFNum) for val in tupleList]
+		deMatrix = pd.read_csv(DEFile)
+		bindingMatrix = pd.read_csv(BinFile)
+
+		nonZeroValuesDEMatrix = deMatrix.astype(bool).sum(axis=0)[1:]
+		nonZeroValuesDEMatrix = nonZeroValuesDEMatrix.sort_index()
+		nonZeroValuesDEMatrix = np.abs(nonZeroValuesDEMatrix - nonZeroValuesDEMatrix[TFNum]).tolist()
+
+		nonZeroValuesBindingMatrix = bindingMatrix.astype(bool).sum(axis=0)[1:]
+		nonZeroValuesBindingMatrix = nonZeroValuesDEMatrix.sort_index()
+		nonZeroValuesBindingMatrix = np.abs(nonZeroValuesBindingMatrix - nonZeroValuesBindingMatrix[TFNum]).tolist()
+
+		if(len(TFIntersection) > 75):
+			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:len(76)] 
+			bindingMatrix75MinimumDistance = sorted(range(len(nonZeroValuesBindingMatrix)), key = lambda sub: nonZeroValuesBindingMatrix[sub])[:len(76)] 
+		else: 
+			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:len(TFIntersection)] 
+			bindingMatrix75MinimumDistance = sorted(range(len(nonZeroValuesBindingMatrix)), key = lambda sub: nonZeroValuesBindingMatrix[sub])[:len(TFIntersection)] 			
+
+		pairingList1 = [(TFNum,val) for val in deMatrix75MinimumDistance]
+		pairingList2 = [(val,TFNum) for val in bindingMatrix75MinimumDistance]
 		set1 = set(pairingList1)
 		set2 = set(pairingList2)
 
-		if(len(TFIntersection) > 100):
-			set_temp1 = set1 - set1.intersection(set2)
-			list_settemp1 = list(set_temp1)
-			list_settemp1 = list_settemp1[0:100]
 
-			set_temp2 = set2 - set1.intersection(set2)
-			list_settemp2 = list(set_temp2)
-			list_settemp2 = list_settemp2[0:100]
-			false_pairing_list = list_settemp1 + list_settemp2
-
-		else:
-			false_pairing_set = set1.union(set2) - set1.intersection(set2)
-			false_pairing_list = list(false_pairing_set)
+		false_pairing_set = set1.union(set2) - set1.intersection(set2)
+		false_pairing_list = list(false_pairing_set)
 		
 		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
 		deTF = sorted(TFIntersection)[curr_tuple[0]]
@@ -134,8 +141,8 @@ def runDualThresholds(DEData, BinData, GenesUniverse):
 	#TODO: Add more items to the optimized results when tf_specificity is true
 	if(str2Bool(parsed.find_tf_specificity)):
 		optimizeResults = optimizedResults[:-1]
-		print(deTF + ": check")
-		print(bindingTF + ": check")
+		print(deTF + ": deTF")
+		print(bindingTF + ": bindingTF")
 		print("Optimized results+ = %s" % optimizedResults)
 	else:
 		print("Optimized results = %s" % optimizedResults[:-1])
@@ -296,7 +303,6 @@ def optimizeThresholds(DEData, BinData, GenesUniverse):
 		out = [TF, TFCommon, len(boundSubGenes), len(DESubGenes), len(GenesIntersection),
 			FDRBound, hyperPval, responseRate, relativeRisk, 
 			foldEnrichment, jaccardSim, intersectionCommon]
-	print(parsed.find_tf_specificity + "Check2")
 	return out
 
 
@@ -358,3 +364,53 @@ def main(argv):
 
 if __name__ == "__main__":
 	main(sys.argv)
+
+
+
+# def getTargetedTF(DEFile, BinFile, TFNum):
+# 	global deTF, bindingTF
+# 	with open(DEFile, "r") as f:
+# 		DEHeader = f.readline().strip().split(",")[1:]
+# 	with open(BinFile, "r") as f:
+# 		BinHeader = f.readline().strip().split(",")[1:]
+# 	TFIntersection = set(DEHeader) & set(BinHeader)
+# 	if parsed.tf_list is not None:
+# 		TFIntersection &= set(list(np.loadtxt(parsed.tf_list, dtype=str)))
+
+# 	if(str2Bool(parsed.find_tf_specificity) == False):
+# 		targetedTF = sorted(TFIntersection)[TFNum]
+# 		deTF = targetedTF
+# 		bindingTF = targetedTF
+# 		DEIdx = DEHeader.index(targetedTF)
+# 		BinIdx = BinHeader.index(targetedTF)
+
+# 	else:
+# 		targetedTF = sorted(TFIntersection)[TFNum]
+# 		tupleList = list(range(0,len(TFIntersection)))
+# 		pairingList1 = [(TFNum,val) for val in tupleList]
+# 		pairingList2 = [(val,TFNum) for val in tupleList]
+# 		set1 = set(pairingList1)
+# 		set2 = set(pairingList2)
+
+# 		if(len(TFIntersection) > 100):
+# 			set_temp1 = set1 - set1.intersection(set2)
+# 			list_settemp1 = list(set_temp1)
+# 			list_settemp1 = list_settemp1[0:100]
+
+# 			set_temp2 = set2 - set1.intersection(set2)
+# 			list_settemp2 = list(set_temp2)
+# 			list_settemp2 = list_settemp2[0:100]
+# 			false_pairing_list = list_settemp1 + list_settemp2
+
+# 		else:
+# 			false_pairing_set = set1.union(set2) - set1.intersection(set2)
+# 			false_pairing_list = list(false_pairing_set)
+		
+# 		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
+# 		deTF = sorted(TFIntersection)[curr_tuple[0]]
+# 		DEIdx = DEHeader.index(deTF)
+# 		bindingTF = sorted(TFIntersection)[curr_tuple[1]]
+# 		BinIdx = BinHeader.index(bindingTF)
+# 		print(str(deTF) + ":" +  str(bindingTF))
+
+# 	return (targetedTF, DEIdx, BinIdx)
