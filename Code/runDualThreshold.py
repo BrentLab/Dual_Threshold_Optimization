@@ -39,12 +39,11 @@ def parse_args(argv):
 	parsed = parser.parse_args(argv[1:])
 	return parsed
 
-
 def str2Bool(boolAsString):
 	return bool(distutils.util.strtobool(boolAsString))
 
 
-def getTargetedTFUpdated(DEFile, BinFile, TFNum):
+def getTargetedTF(DEFile, BinFile, TFNum):
 	global deTF, bindingTF
 	with open(DEFile, "r") as f:
 		DEHeader = f.readline().strip().split(",")[1:]
