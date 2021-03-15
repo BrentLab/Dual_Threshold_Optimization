@@ -70,12 +70,12 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 		nonZeroValuesDEMatrix = np.abs(nonZeroValuesDEMatrix - nonZeroValuesDEMatrix[TFNum]).tolist()
 
 		nonZeroValuesBindingMatrix = bindingMatrix.astype(bool).sum(axis=0)[1:]
-		nonZeroValuesBindingMatrix = nonZeroValuesDEMatrix.sort_index()
+		nonZeroValuesBindingMatrix = nonZeroValuesBindingMatrix.sort_index()
 		nonZeroValuesBindingMatrix = np.abs(nonZeroValuesBindingMatrix - nonZeroValuesBindingMatrix[TFNum]).tolist()
 
 		if(len(TFIntersection) > 75):
-			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:len(76)] 
-			bindingMatrix75MinimumDistance = sorted(range(len(nonZeroValuesBindingMatrix)), key = lambda sub: nonZeroValuesBindingMatrix[sub])[:len(76)] 
+			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:76] 
+			bindingMatrix75MinimumDistance = sorted(range(len(nonZeroValuesBindingMatrix)), key = lambda sub: nonZeroValuesBindingMatrix[sub])[:76] 
 		else: 
 			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:len(TFIntersection)] 
 			bindingMatrix75MinimumDistance = sorted(range(len(nonZeroValuesBindingMatrix)), key = lambda sub: nonZeroValuesBindingMatrix[sub])[:len(TFIntersection)] 			
