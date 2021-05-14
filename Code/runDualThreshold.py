@@ -80,11 +80,12 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:len(TFIntersection)] 
 			bindingMatrix75MinimumDistance = sorted(range(len(nonZeroValuesBindingMatrix)), key = lambda sub: nonZeroValuesBindingMatrix[sub])[:len(TFIntersection)] 			
 
-		pairingList1 = [(TFNum,val) for val in deMatrix75MinimumDistance]
-		pairingList2 = [(val,TFNum) for val in bindingMatrix75MinimumDistance]
+		# Fixed the mismatch issue of DE and binding tf here. line 85 now has bindingMatrix75MinimumDistance and line 86 has deMatrix75MinimumDistance. 
+		# Previously, it was viceversa.
+		pairingList1 = [(TFNum,val) for val in bindingMatrix75MinimumDistance]
+		pairingList2 = [(val,TFNum) for val in deMatrix75MinimumDistance]
 		set1 = set(pairingList1)
 		set2 = set(pairingList2)
-
 
 		false_pairing_set = set1.union(set2) - set1.intersection(set2)
 		false_pairing_list = list(false_pairing_set)
@@ -97,6 +98,20 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 		print(str(deTF) + ":" +  str(bindingTF))
 
 	return (targetedTF, DEIdx, BinIdx)
+
+# def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False):
+# 	data = np.loadtxt(dataFile, usecols=[0, (targetedIdx+1)], 
+# 					dtype=str, delimiter=",")
+# 	if(targetedIdx != parsed.TF_num and parsed.find_tf_specificity == True):
+# 		data_temp = np.loadtxt(dataFile, usecols=[0, (TFNum+1)], 
+# 						dtype=str, delimiter=",")
+# 		genes = data[1:, 0]
+# 	else: 
+# 		genes = data[1:, 0]
+# 		values = data[1:, 1].astype(float)
+# 		if useAbs:
+# 			values = np.abs(values)
+# 	return (values.tolist(), genes.tolist(), targetedTF)
 
 
 def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False):
