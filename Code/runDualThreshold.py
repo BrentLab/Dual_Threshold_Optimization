@@ -71,7 +71,7 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 
 		nonZeroValuesBindingMatrix = bindingMatrix.astype(bool).sum(axis=0)[1:]
 		nonZeroValuesBindingMatrix = nonZeroValuesBindingMatrix.sort_index()
-		nonZeroValuesBindingMatrix = np.abs(nonZeroValuesBindingMatrix - nonZeroValuesBindingMatrix[TFNum]).tolist()
+		nonZeroValuesBindingMatrix = np.abs(nonZeroValuesBindingMatrix - nonZeroValuesBindingMatrix[TFNum]).tolist() 
 
 		if(len(TFIntersection) > 75):
 			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:76] 
@@ -99,29 +99,48 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 
 	return (targetedTF, DEIdx, BinIdx)
 
+def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False, deFile = False):
+    with open(dataFile, "r") as f:
+        DataFileHeader = f.readline().strip().split(",")[1:]
+    targetedTFIndex = DataFileHeader.index(targetedTF)
+    data = np.loadtxt(dataFile, usecols=[0, (targetedIdx+1), targetedTFIndex + 1], 
+                    dtype=str, delimiter=",")      
+    genes = data[1:, 0]
+    if(targetedTFIndex != targetedIdx):
+        targetTFValues = data[1:,2].astype(float)
+        targetedIdxValues = data[1:,1].astype(float)
+        if(deFile == False):
+            numberOfSignificantElements = len(np.nonzero(targetTFValues)[0])
+            print(numberOfSignificantElements)
+        else:
+            numberOfSignificantElements = len(np.where(targetTFValues != 1)[0])
+            print(numberOfSignificantElements)
+        if(deFile == False):
+            indicesTopElements = (-targetedIdxValues).argsort()[:numberOfSignificantElements]
+        else:
+            indicesTopElements = (targetedIdxValues).argsort()[:numberOfSignificantElements]
+        for index in range(len(targetedIdxValues)):
+            if (index not in indicesTopElements):
+                if(deFile == False):
+                    targetedIdxValues[index] = 0
+                else:
+                    targetedIdxValues[index] = 1
+        values = targetedIdxValues
+    else:
+        values = data[1:, 1].astype(float)
+    if useAbs:
+        values = np.abs(values)
+    return (values.tolist(), genes.tolist(), targetedTF)
+
+
 # def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False):
 # 	data = np.loadtxt(dataFile, usecols=[0, (targetedIdx+1)], 
 # 					dtype=str, delimiter=",")
-# 	if(targetedIdx != parsed.TF_num and parsed.find_tf_specificity == True):
-# 		data_temp = np.loadtxt(dataFile, usecols=[0, (TFNum+1)], 
-# 						dtype=str, delimiter=",")
-# 		genes = data[1:, 0]
-# 	else: 
-# 		genes = data[1:, 0]
-# 		values = data[1:, 1].astype(float)
-# 		if useAbs:
-# 			values = np.abs(values)
+# 	genes = data[1:, 0]
+# 	values = data[1:, 1].astype(float)
+# 	if useAbs:
+# 		values = np.abs(values)
 # 	return (values.tolist(), genes.tolist(), targetedTF)
-
-
-def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False):
-	data = np.loadtxt(dataFile, usecols=[0, (targetedIdx+1)], 
-					dtype=str, delimiter=",")
-	genes = data[1:, 0]
-	values = data[1:, 1].astype(float)
-	if useAbs:
-		values = np.abs(values)
-	return (values.tolist(), genes.tolist(), targetedTF)
 
 
 def alignToUniverse(data, GenesUniverse, decreasing=True):
@@ -353,9 +372,9 @@ def main(argv):
 	sys.stdout.write("%s\n" % targetedTF)
 	sys.stdout.flush()
 	DEData = getTargetedTFData(parsed.de_file, targetedDEIdx, 
-								targetedTF, useAbs=True)
+								targetedTF, useAbs=True, deFile = True)
 	BinData = getTargetedTFData(parsed.bin_file, targetedBinIdx, 
-								targetedTF, useAbs=True)
+								targetedTF, useAbs=True, deFile = False)
 	if parsed.geneNames_file is None or parsed.geneNames_file == "":
 		sysDict = {}
 	else:
