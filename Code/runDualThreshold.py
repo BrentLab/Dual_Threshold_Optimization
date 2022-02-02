@@ -43,6 +43,55 @@ def str2Bool(boolAsString):
 	return bool(distutils.util.strtobool(boolAsString))
 
 
+def getTargetedTF(DEFile, BinFile, TFNum):
+	global deTF, bindingTF
+	with open(DEFile, "r") as f:
+		DEHeader = f.readline().strip().split(",")[1:]
+	with open(BinFile, "r") as f:
+		BinHeader = f.readline().strip().split(",")[1:]
+	TFIntersection = set(DEHeader) & set(BinHeader)
+	if parsed.tf_list is not None:
+		TFIntersection &= set(list(np.loadtxt(parsed.tf_list, dtype=str)))
+
+	if(str2Bool(parsed.find_tf_specificity) == False):
+		targetedTF = sorted(TFIntersection)[TFNum]
+		deTF = targetedTF
+		bindingTF = targetedTF
+		DEIdx = DEHeader.index(targetedTF)
+		BinIdx = BinHeader.index(targetedTF)
+
+	else:
+		targetedTF = sorted(TFIntersection)[TFNum]
+		tupleList = list(range(0,len(TFIntersection)))
+		pairingList1 = [(TFNum,val) for val in tupleList]
+		pairingList2 = [(val,TFNum) for val in tupleList]
+		set1 = set(pairingList1)
+		set2 = set(pairingList2)
+
+		if(len(TFIntersection) > 100):
+			set_temp1 = set1 - set1.intersection(set2)
+			list_settemp1 = list(set_temp1)
+			list_settemp1 = list_settemp1[0:100]
+
+			set_temp2 = set2 - set1.intersection(set2)
+			list_settemp2 = list(set_temp2)
+			list_settemp2 = list_settemp2[0:100]
+			false_pairing_list = list_settemp1 + list_settemp2
+
+		else:
+			false_pairing_set = set1.union(set2) - set1.intersection(set2)
+			false_pairing_list = list(false_pairing_set)
+		
+		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
+		deTF = sorted(TFIntersection)[curr_tuple[0]]
+		DEIdx = DEHeader.index(deTF)
+		bindingTF = sorted(TFIntersection)[curr_tuple[1]]
+		BinIdx = BinHeader.index(bindingTF)
+		print(str(deTF) + ":" +  str(bindingTF))
+
+	return (targetedTF, DEIdx, BinIdx)
+
+
 # def getTargetedTF(DEFile, BinFile, TFNum):
 # 	global deTF, bindingTF
 # 	with open(DEFile, "r") as f:
@@ -398,52 +447,3 @@ def main(argv):
 if __name__ == "__main__":
 	main(sys.argv)
 
-
-
-def getTargetedTF(DEFile, BinFile, TFNum):
-	global deTF, bindingTF
-	with open(DEFile, "r") as f:
-		DEHeader = f.readline().strip().split(",")[1:]
-	with open(BinFile, "r") as f:
-		BinHeader = f.readline().strip().split(",")[1:]
-	TFIntersection = set(DEHeader) & set(BinHeader)
-	if parsed.tf_list is not None:
-		TFIntersection &= set(list(np.loadtxt(parsed.tf_list, dtype=str)))
-
-	if(str2Bool(parsed.find_tf_specificity) == False):
-		targetedTF = sorted(TFIntersection)[TFNum]
-		deTF = targetedTF
-		bindingTF = targetedTF
-		DEIdx = DEHeader.index(targetedTF)
-		BinIdx = BinHeader.index(targetedTF)
-
-	else:
-		targetedTF = sorted(TFIntersection)[TFNum]
-		tupleList = list(range(0,len(TFIntersection)))
-		pairingList1 = [(TFNum,val) for val in tupleList]
-		pairingList2 = [(val,TFNum) for val in tupleList]
-		set1 = set(pairingList1)
-		set2 = set(pairingList2)
-
-		if(len(TFIntersection) > 100):
-			set_temp1 = set1 - set1.intersection(set2)
-			list_settemp1 = list(set_temp1)
-			list_settemp1 = list_settemp1[0:100]
-
-			set_temp2 = set2 - set1.intersection(set2)
-			list_settemp2 = list(set_temp2)
-			list_settemp2 = list_settemp2[0:100]
-			false_pairing_list = list_settemp1 + list_settemp2
-
-		else:
-			false_pairing_set = set1.union(set2) - set1.intersection(set2)
-			false_pairing_list = list(false_pairing_set)
-		
-		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
-		deTF = sorted(TFIntersection)[curr_tuple[0]]
-		DEIdx = DEHeader.index(deTF)
-		bindingTF = sorted(TFIntersection)[curr_tuple[1]]
-		BinIdx = BinHeader.index(bindingTF)
-		print(str(deTF) + ":" +  str(bindingTF))
-
-	return (targetedTF, DEIdx, BinIdx)
