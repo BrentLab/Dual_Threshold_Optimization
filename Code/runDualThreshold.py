@@ -148,6 +148,10 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 
 # 	return (targetedTF, DEIdx, BinIdx)
 
+
+
+#makes sure that false binding or false perturbation file has same number of non-zeroes value as true binding or true perturbation file respectively.
+#If the edges in false binding or false perturbation is samller than the the respective true binding or true perturbation file, it does not do anything. 
 def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False, deFile = False):
     with open(dataFile, "r") as f:
         DataFileHeader = f.readline().strip().split(",")[1:]
