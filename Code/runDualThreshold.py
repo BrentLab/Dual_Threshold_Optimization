@@ -65,23 +65,28 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 		tupleList = list(range(0,len(TFIntersection)))
 		pairingList1 = [(TFNum,val) for val in tupleList]
 		pairingList2 = [(val,TFNum) for val in tupleList]
+
 		set1 = set(pairingList1)
 		set2 = set(pairingList2)
+		set1 = set1 - set1.intersection(set2)
+		set2 = set2 - set1.intersection(set2)
+
+		pairingList1 = list(set1)
+		pairingList2 = list(set2)
+
+		pairingList1.sort(key = lambda x: x[1])
+		pairingList2.sort(key = lambda x: x[0])
+
 
 		if(len(TFIntersection) > 100):
-			set_temp1 = set1 - set1.intersection(set2)
-			list_settemp1 = list(set_temp1)
-			list_settemp1 = list_settemp1[0:100]
-
-			set_temp2 = set2 - set1.intersection(set2)
-			list_settemp2 = list(set_temp2)
-			list_settemp2 = list_settemp2[0:100]
-			false_pairing_list = list_settemp1 + list_settemp2
+			random_list = random.sample(range(len(TFIntersection)), 100)
+			list_temp1 =  [pairingList1[i] for i in random_list]
+			list_temp2 = [pairingList2[i] for i in random_list]
+			false_pairing_list = list_temp1 + list_temp2
 
 		else:
-			false_pairing_set = set1.union(set2) - set1.intersection(set2)
-			false_pairing_list = list(false_pairing_set)
-		
+			false_pairing_list = pairingList1 + pairingList2
+			
 		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
 		deTF = sorted(TFIntersection)[curr_tuple[0]]
 		DEIdx = DEHeader.index(deTF)
@@ -92,109 +97,49 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 	return (targetedTF, DEIdx, BinIdx)
 
 
-# def getTargetedTF(DEFile, BinFile, TFNum):
-# 	global deTF, bindingTF
-# 	with open(DEFile, "r") as f:
-# 		DEHeader = f.readline().strip().split(",")[1:]
-# 	with open(BinFile, "r") as f:
-# 		BinHeader = f.readline().strip().split(",")[1:]
-# 	TFIntersection = set(DEHeader) & set(BinHeader)
-# 	if parsed.tf_list is not None:
-# 		TFIntersection &= set(list(np.loadtxt(parsed.tf_list, dtype=str)))
-
-# 	if(str2Bool(parsed.find_tf_specificity) == False):
-# 		targetedTF = sorted(TFIntersection)[TFNum]
-# 		deTF = targetedTF
-# 		bindingTF = targetedTF
-# 		DEIdx = DEHeader.index(targetedTF)
-# 		BinIdx = BinHeader.index(targetedTF)
-
-# 	else:
-# 		targetedTF = sorted(TFIntersection)[TFNum]
-# 		deMatrix = pd.read_csv(DEFile)
-# 		bindingMatrix = pd.read_csv(BinFile)
-
-# 		nonZeroValuesDEMatrix = deMatrix.astype(bool).sum(axis=0)[1:]
-# 		nonZeroValuesDEMatrix = nonZeroValuesDEMatrix.sort_index()
-# 		nonZeroValuesDEMatrix = np.abs(nonZeroValuesDEMatrix - nonZeroValuesDEMatrix[TFNum]).tolist()
-
-# 		nonZeroValuesBindingMatrix = bindingMatrix.astype(bool).sum(axis=0)[1:]
-# 		nonZeroValuesBindingMatrix = nonZeroValuesBindingMatrix.sort_index()
-# 		nonZeroValuesBindingMatrix = np.abs(nonZeroValuesBindingMatrix - nonZeroValuesBindingMatrix[TFNum]).tolist() 
-
-# 		if(len(TFIntersection) > 75):
-# 			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:76] 
-# 			bindingMatrix75MinimumDistance = sorted(range(len(nonZeroValuesBindingMatrix)), key = lambda sub: nonZeroValuesBindingMatrix[sub])[:76] 
-# 		else: 
-# 			deMatrix75MinimumDistance = sorted(range(len(nonZeroValuesDEMatrix)), key = lambda sub: nonZeroValuesDEMatrix[sub])[:len(TFIntersection)] 
-# 			bindingMatrix75MinimumDistance = sorted(range(len(nonZeroValuesBindingMatrix)), key = lambda sub: nonZeroValuesBindingMatrix[sub])[:len(TFIntersection)] 			
-
-# 		# Fixed the mismatch issue of DE and binding tf here. line 85 now has bindingMatrix75MinimumDistance and line 86 has deMatrix75MinimumDistance. 
-# 		# Previously, it was viceversa.
-# 		pairingList1 = [(TFNum,val) for val in bindingMatrix75MinimumDistance]
-# 		pairingList2 = [(val,TFNum) for val in deMatrix75MinimumDistance]
-# 		set1 = set(pairingList1)
-# 		set2 = set(pairingList2)
-
-# 		false_pairing_set = set1.union(set2) - set1.intersection(set2)
-# 		false_pairing_list = list(false_pairing_set)
-		
-# 		curr_tuple = false_pairing_list[parsed.tuple_index_false_pairing]
-# 		deTF = sorted(TFIntersection)[curr_tuple[0]]
-# 		DEIdx = DEHeader.index(deTF)
-# 		bindingTF = sorted(TFIntersection)[curr_tuple[1]]
-# 		BinIdx = BinHeader.index(bindingTF)
-# 		print(str(deTF) + ":" +  str(bindingTF))
-
-# 	return (targetedTF, DEIdx, BinIdx)
-
-
-
 #makes sure that false binding or false perturbation file has same number of non-zeroes value as true binding or true perturbation file respectively.
 #If the edges in false binding or false perturbation is samller than the the respective true binding or true perturbation file, it does not do anything. 
 def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False, deFile = False):
     with open(dataFile, "r") as f:
         DataFileHeader = f.readline().strip().split(",")[1:]
+
     targetedTFIndex = DataFileHeader.index(targetedTF)
     data = np.loadtxt(dataFile, usecols=[0, (targetedIdx+1), targetedTFIndex + 1], 
                     dtype=str, delimiter=",")      
     genes = data[1:, 0]
+
+    ## SET UP FOR USING P_VALUE FOR PERTURBATION DATA
     if(targetedTFIndex != targetedIdx):
         targetTFValues = data[1:,2].astype(float)
         targetedIdxValues = data[1:,1].astype(float)
+        
         if(deFile == False):
             numberOfSignificantElements = len(np.nonzero(targetTFValues)[0])
             print(numberOfSignificantElements)
         else:
             numberOfSignificantElements = len(np.where(targetTFValues != 1)[0])
             print(numberOfSignificantElements)
+
         if(deFile == False):
             indicesTopElements = (-targetedIdxValues).argsort()[:numberOfSignificantElements]
         else:
             indicesTopElements = (targetedIdxValues).argsort()[:numberOfSignificantElements]
+
         for index in range(len(targetedIdxValues)):
             if (index not in indicesTopElements):
                 if(deFile == False):
                     targetedIdxValues[index] = 0
                 else:
                     targetedIdxValues[index] = 1
+
         values = targetedIdxValues
     else:
         values = data[1:, 1].astype(float)
+
     if useAbs:
         values = np.abs(values)
+
     return (values.tolist(), genes.tolist(), targetedTF)
-
-
-# def getTargetedTFData(dataFile, targetedIdx, targetedTF, useAbs=False):
-# 	data = np.loadtxt(dataFile, usecols=[0, (targetedIdx+1)], 
-# 					dtype=str, delimiter=",")
-# 	genes = data[1:, 0]
-# 	values = data[1:, 1].astype(float)
-# 	if useAbs:
-# 		values = np.abs(values)
-# 	return (values.tolist(), genes.tolist(), targetedTF)
-
 
 def alignToUniverse(data, GenesUniverse, decreasing=True):
 	values, genes, TF = data

@@ -240,6 +240,7 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Speci
 	jobName = "runDTO_%A_%a"
 	if(str2Bool(parsed.random) == False and TF_Specificity == False):
 		f = open(parsed.sbatch_loc+"/runAnalysis.sbatch", 'w')
+	# <------------ HERE ----------- > 
 	elif(str2Bool(parsed.random) == False and TF_Specificity == True):
 		f = open(parsed.sbatch_loc+ "/find_tf_specificity/" + TF + "/" +  "runAnalysis.sbatch", 'w')
 	else:
@@ -257,16 +258,26 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Speci
 		f.write("#SBATCH --array=0-"+str(numTFs-1)+"%50\n")
 		f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
 
+	# <----------------------------- HERE ----------------> 
 	elif(str2Bool(parsed.random) == False and TF_Specificity == True):
 		f.write("#SBATCH -J "+jobName+"_"+str(iterNum)+"\n")
 		f.write("#SBATCH -o "+ parsed.sbatch_loc+"/find_tf_specificity/"+ TF + "/log/"+jobName+"_"+str(iterNum)+".out\n")
 		f.write("#SBATCH -e "+parsed.sbatch_loc+"/find_tf_specificity/"+ TF + "/log/"+jobName+"_"+str(iterNum)+".err\n")
-		#TODO: Change needed here
-		if(numTFs <= 75):
-			f.write("#SBATCH --array=0-"+str(numTFs*2-3)+"%200\n")
+
+
+		if(numTFs <= 100):
+			num_runs = (numTFs * 2) - 3
+			f.write("#SBATCH --array=0\n")
+			f.write("START=$(( SLURM_ARRAY_TASK_ID * 100 ))\n")
+			f.write("STOP=$(( START + " + str(num_runs) + " ))\n")
+			f.write("[ \"$STOP\" -eq " + str(num_runs) + " ] && STOP=" + str(num_runs + 1) + "\n\n")
+			f.write("for ID in $( seq $START $STOP ); do\n")
 		else:
-			f.write("#SBATCH --array=0-"+str(149)+"%200\n")
-		f.write("ID=${SLURM_ARRAY_TASK_ID}\n")
+			f.write("#SBATCH --array=0-1\n")
+			f.write("START=$(( SLURM_ARRAY_TASK_ID * 100 ))\n")
+			f.write("STOP=$(( START + 99 ))\n")
+			f.write("[ \"$STOP\" -eq 199 ] && STOP=200\n\n")
+			f.write("for ID in $( seq $START $STOP ); do\n")			
 
 	else:
 		f.write("#SBATCH -J "+jobName+"_"+str(iterNum)+"\n")
@@ -290,8 +301,8 @@ def createSbatchFile(numTFs,codeDir,iterNum="",numIters=1,TFNum=1,TF="",TF_Speci
 	
 	elif(str2Bool(parsed.random) == False and TF_Specificity == True):
 		f.write(
-			"python runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --output_dir " + parsed.sbatch_loc + "/find_tf_specificity/" + TF + " --find_tf_specificity " + str(TF_Specificity) + " --tuple_index_false_pairing " + "${ID}" + "\n")
-
+			"\tpython runDualThreshold.py --de_file " + parsed.de_file + " --bin_file " + parsed.bin_file + " --DE_decreasing " + str(parsed.DE_decreasing) + " --Bin_decreasing " + str(parsed.Bin_decreasing) + " --TF_num " + str(TFNum) + " --rank_width " + parsed.rank_width + " --opt_crit " + parsed.opt_crit + " --genes_universe " + universe + " --geneNames_file " + geneNames + " --DE_pval_lower_bound " + str(parsed.DE_pval_lower_bound)  + " --Bin_pval_lower_bound " + str(parsed.Bin_pval_lower_bound) + " --output_dir " + parsed.sbatch_loc + "/find_tf_specificity/" + TF + " --find_tf_specificity " + str(TF_Specificity) + " --tuple_index_false_pairing " + "${ID}" + "\n")
+		f.write("done\n")
 	else:
 		if(parsed.rand_type == "global"):
 			f.write(
