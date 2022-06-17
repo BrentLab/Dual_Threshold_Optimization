@@ -68,18 +68,18 @@ def getTargetedTF(DEFile, BinFile, TFNum):
 
 		set1 = set(pairingList1)
 		set2 = set(pairingList2)
-		set1 = set1 - set1.intersection(set2)
-		set2 = set2 - set1.intersection(set2)
+		set1_temp = set1 - set1.intersection(set2)
+		set2_temp = set2 - set1.intersection(set2)
 
-		pairingList1 = list(set1)
-		pairingList2 = list(set2)
+		pairingList1 = list(set1_temp)
+		pairingList2 = list(set2_temp)
 
 		pairingList1.sort(key = lambda x: x[1])
 		pairingList2.sort(key = lambda x: x[0])
 
 
 		if(len(TFIntersection) > 100):
-			random_list = random.sample(range(len(TFIntersection)), 100)
+			random_list = random.sample(range(len(TFIntersection) - 1), 100)
 			list_temp1 =  [pairingList1[i] for i in random_list]
 			list_temp2 = [pairingList2[i] for i in random_list]
 			false_pairing_list = list_temp1 + list_temp2
