@@ -1,4 +1,4 @@
-use statrs::distribution::{Hypergeometric, Discrete};
+use statrs::distribution::{Discrete, Hypergeometric};
 
 /// Calculate the hypergeometric p-value.
 ///
@@ -22,7 +22,7 @@ use statrs::distribution::{Hypergeometric, Discrete};
 ///
 /// ```
 /// use dual_threshold_optimization::hypergeometric_pvalue;
-/// 
+///
 /// let p_value = hypergeometric_pvalue(1000, 50, 60, 10);
 /// assert_eq!(p_value, 0.0004406807022244126);
 /// ```
@@ -33,19 +33,14 @@ pub fn hypergeometric_pvalue(
     observed_overlap: u64,
 ) -> f64 {
     // Create the hypergeometric distribution
-    let hypergeom = Hypergeometric::new(
-        population_size,
-        successes_in_population,
-        sample_size,
-    )
-    .expect("Failed to create hypergeometric distribution");
+    let hypergeom = Hypergeometric::new(population_size, successes_in_population, sample_size)
+        .expect("Failed to create hypergeometric distribution");
 
     // Calculate the p-value as the upper tail probability. This is done by iterating
     // over all possible intersection sizes that are at least as large as the observed
     // overlap size, and summing the probabilities of observing each of these sizes.
     let mut p_value = 0.0;
-    for x in
-        observed_overlap..=u64::min(successes_in_population,sample_size) {
+    for x in observed_overlap..=u64::min(successes_in_population, sample_size) {
         p_value += hypergeom.pmf(x as u64);
     }
 

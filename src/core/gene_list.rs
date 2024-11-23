@@ -198,27 +198,27 @@ impl GeneList {
     /// Remove a `Gene` from the list by index.
     /// Returns the removed `Gene` if successful,
     /// or an error message if the index is out of bounds.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `index` - The index of the `Gene` to remove.
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// - `Ok(Gene)` if the `Gene` was successfully removed.
     /// - `Err(String)` if the index is out of bounds.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use dual_threshold_optimization::{Gene, GeneList};
-    /// 
+    ///
     /// let mut gene_list = GeneList::from(vec![
     ///    Gene::from("gene1"),
     ///   Gene::from("gene2"),
     ///   Gene::from("gene3"),
     /// ]);
-    /// 
+    ///
     /// let removed_gene = gene_list.remove(1);
     /// match removed_gene {
     ///     Ok(gene) => println!("Removed gene: {}", gene.id()),
@@ -229,14 +229,14 @@ impl GeneList {
     /// assert_eq!(gene_list.genes()[1].id(), "gene3");
     /// ```
     pub fn remove(&mut self, index: usize) -> Result<Gene, String> {
-    if index >= self.genes.len() {
-        return Err(format!(
-            "Index out of bounds: {} (length: {})",
-            index,
-            self.genes.len()
-        ));
-    }
-    Ok(self.genes.remove(index))
+        if index >= self.genes.len() {
+            return Err(format!(
+                "Index out of bounds: {} (length: {})",
+                index,
+                self.genes.len()
+            ));
+        }
+        Ok(self.genes.remove(index))
     }
 
     /// Computes the intersection of two `GeneList`s.
@@ -266,13 +266,11 @@ impl GeneList {
         let ids1: HashSet<_> = self.genes().iter().map(|g| g.id()).collect();
         let ids2: HashSet<_> = other.genes().iter().map(|g| g.id()).collect();
 
-        self
-            .genes()
+        self.genes()
             .iter()
             .filter(|gene| ids1.contains(gene.id()) && ids2.contains(gene.id()))
             .collect()
     }
-
 
     /// Computes the genes that are either exclusive to one of the two `GeneList`s
     /// (symmetric difference) or only in `self` but not in `other` (set difference).
@@ -311,11 +309,7 @@ impl GeneList {
     /// assert_eq!(exclusive.len(), 1);
     /// assert_eq!(exclusive[0].id(), "gene1");
     /// ```
-    pub fn difference<'a>(
-        &'a self,
-        other: &'a GeneList,
-        symmetric: bool,
-    ) -> Vec<&'a Gene> {
+    pub fn difference<'a>(&'a self, other: &'a GeneList, symmetric: bool) -> Vec<&'a Gene> {
         let ids1: HashSet<_> = self.genes().iter().map(|g| g.id()).collect();
         let ids2: HashSet<_> = other.genes().iter().map(|g| g.id()).collect();
 

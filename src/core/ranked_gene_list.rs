@@ -28,23 +28,23 @@ impl<'a> RankedGeneListItem<'a> {
 /// ThresholdState is an enum used in RankedGeneList to track whether there are
 /// valid thresholds for the ranks in the list. This is used to determine whether
 /// the thresholds need to be recalculated
-/// 
+///
 /// # Fields
-/// 
+///
 /// - `Unthresholded`: The list has no thresholds
 /// - `Thresholded`: The list has thresholds
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use dual_threshold_optimization::ThresholdState;
-/// 
+///
 /// let state = ThresholdState::Unthresholded;
-/// 
+///
 /// assert_eq!(state, ThresholdState::Unthresholded);
-/// 
+///
 /// let state = ThresholdState::Thresholded;
-/// 
+///
 /// assert_eq!(state, ThresholdState::Thresholded);
 /// ```
 #[derive(Debug, PartialEq)]
@@ -55,17 +55,17 @@ pub enum ThresholdState {
 
 /// An enum to represent whether a single index or multiple indices should be removed.
 /// This is used in the `remove` method of `RankedGeneList`.
-/// 
+///
 /// # Fields
-/// 
+///
 /// - `Single(usize)`: Remove a single index
 /// - `Multiple(Vec<usize>)`: Remove multiple indices
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use dual_threshold_optimization::RemoveIndices;
-/// 
+///
 /// let single_index = RemoveIndices::Single(5);
 /// let multiple_indices = RemoveIndices::Multiple(vec![1, 2, 3]);
 /// ```
@@ -343,22 +343,22 @@ impl RankedGeneList {
     }
 
     /// Get the length of the `RankedGeneList`.
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// The number of genes in the list.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use dual_threshold_optimization::{Gene, GeneList, RankedGeneList};
-    /// 
+    ///
     /// let genes = GeneList::from(vec![Gene::from("gene1"), Gene::from("gene2")]);
-    /// 
+    ///
     /// let ranks = vec![1, 2];
-    /// 
+    ///
     /// let ranked_list = RankedGeneList::from(genes, ranks).unwrap();
-    /// 
+    ///
     /// assert_eq!(ranked_list.len(), 2);
     pub fn len(&self) -> usize {
         self.genes.len()
@@ -528,7 +528,9 @@ impl RankedGeneList {
         if index >= self.genes.len() {
             return Err(format!("Index {} is out of bounds", index));
         }
-        self.genes.remove(index).map_err(|_| "Gene removal failed".to_string())?;
+        self.genes
+            .remove(index)
+            .map_err(|_| "Gene removal failed".to_string())?;
         self.ranks.remove(index);
         if self.threshold_state == ThresholdState::Thresholded {
             self.threshold_state = ThresholdState::Unthresholded;
@@ -565,7 +567,6 @@ impl RankedGeneList {
     }
 }
 
-
 // Implement `Into<RemoveIndices>` for `usize` and `Vec<usize>` for flexible input.
 impl From<usize> for RemoveIndices {
     fn from(index: usize) -> Self {
@@ -592,7 +593,11 @@ mod tests {
     /// Test the iterator over a `RankedGeneList` with multiple elements.
     #[test]
     fn test_ranked_gene_list_iterator() {
-        let genes = GeneList::from(vec![Gene::from("gene1"), Gene::from("gene2"), Gene::from("gene3")]);
+        let genes = GeneList::from(vec![
+            Gene::from("gene1"),
+            Gene::from("gene2"),
+            Gene::from("gene3"),
+        ]);
         let ranks = vec![3, 2, 1];
         let ranked_list = RankedGeneList::from(genes, ranks).unwrap();
 
@@ -612,7 +617,6 @@ mod tests {
         assert_eq!(iter.next(), None); // This will now work without error
     }
 
-
     /// Test that an empty `RankedGeneList` produces an empty iterator.
     #[test]
     fn test_ranked_gene_list_iterator_empty() {
@@ -625,7 +629,11 @@ mod tests {
     /// Test removal of a single valid index.
     #[test]
     fn test_remove_single_index() {
-        let genes = GeneList::from(vec![Gene::from("gene1"), Gene::from("gene2"), Gene::from("gene3")]);
+        let genes = GeneList::from(vec![
+            Gene::from("gene1"),
+            Gene::from("gene2"),
+            Gene::from("gene3"),
+        ]);
         let ranks = vec![3, 2, 1];
         let mut ranked_list = RankedGeneList::from(genes, ranks).unwrap();
 
@@ -641,7 +649,11 @@ mod tests {
     /// Test removal of multiple valid indices in reverse order.
     #[test]
     fn test_remove_multiple_indices() {
-        let genes = GeneList::from(vec![Gene::from("gene1"), Gene::from("gene2"), Gene::from("gene3")]);
+        let genes = GeneList::from(vec![
+            Gene::from("gene1"),
+            Gene::from("gene2"),
+            Gene::from("gene3"),
+        ]);
         let ranks = vec![3, 2, 1];
         let mut ranked_list = RankedGeneList::from(genes, ranks).unwrap();
 
@@ -671,7 +683,11 @@ mod tests {
     /// Test that removal of all indices leaves an empty `RankedGeneList`.
     #[test]
     fn test_remove_all_indices() {
-        let genes = GeneList::from(vec![Gene::from("gene1"), Gene::from("gene2"), Gene::from("gene3")]);
+        let genes = GeneList::from(vec![
+            Gene::from("gene1"),
+            Gene::from("gene2"),
+            Gene::from("gene3"),
+        ]);
         let ranks = vec![3, 2, 1];
         let mut ranked_list = RankedGeneList::from(genes, ranks).unwrap();
 
@@ -683,7 +699,11 @@ mod tests {
     /// Test removal of indices with repeated ranks to ensure stability.
     #[test]
     fn test_remove_indices_with_duplicate_ranks() {
-        let genes = GeneList::from(vec![Gene::from("gene1"), Gene::from("gene2"), Gene::from("gene3")]);
+        let genes = GeneList::from(vec![
+            Gene::from("gene1"),
+            Gene::from("gene2"),
+            Gene::from("gene3"),
+        ]);
         let ranks = vec![2, 2, 1];
         let mut ranked_list = RankedGeneList::from(genes, ranks).unwrap();
 
@@ -698,7 +718,11 @@ mod tests {
     /// Test the iterator after removals to ensure consistency.
     #[test]
     fn test_iterator_after_removals() {
-        let genes = GeneList::from(vec![Gene::from("gene1"), Gene::from("gene2"), Gene::from("gene3")]);
+        let genes = GeneList::from(vec![
+            Gene::from("gene1"),
+            Gene::from("gene2"),
+            Gene::from("gene3"),
+        ]);
         let ranks = vec![3, 2, 1];
         let mut ranked_list = RankedGeneList::from(genes, ranks).unwrap();
 
@@ -754,16 +778,15 @@ mod tests {
         let ranks1 = vec![4, 3, 2, 1];
         let mut ranked_list1 = RankedGeneList::from(genes1, ranks1).unwrap();
 
-        let genes2 = GeneList::from(vec![
-            Gene::from("gene2"),
-            Gene::from("gene4"),
-        ]);
+        let genes2 = GeneList::from(vec![Gene::from("gene2"), Gene::from("gene4")]);
         let ranks2 = vec![1, 2];
         let ranked_list2 = RankedGeneList::from(genes2, ranks2).unwrap();
 
         // Use the second list to filter the first
         ranked_list1.filter_and_remove(|item| {
-            !ranked_list2.iter().any(|other_item| other_item.gene().id() == item.gene().id())
+            !ranked_list2
+                .iter()
+                .any(|other_item| other_item.gene().id() == item.gene().id())
         });
 
         // Check that only the genes from the second list remain in the first
@@ -776,5 +799,4 @@ mod tests {
         assert_eq!(remaining_items[0].rank(), 1);
         assert_eq!(remaining_items[1].rank(), 3);
     }
-
 }

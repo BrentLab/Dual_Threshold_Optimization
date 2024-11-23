@@ -45,9 +45,7 @@ impl Gene {
     /// assert_eq!(gene.id(), "gene1");
     /// ```
     pub fn from(id: &str) -> Self {
-        Self {
-            id: id.to_string(),
-        }
+        Self { id: id.to_string() }
     }
 
     /// Retrieve the identifier of the `Gene` as a string slice.

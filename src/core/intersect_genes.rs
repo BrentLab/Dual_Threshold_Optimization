@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use crate::Gene;
+use std::collections::HashSet;
 
 /// Computes the size of the intersection of two slices of `&Gene` based on their IDs.
 ///
@@ -42,5 +42,9 @@ where
     let ids1: HashSet<_> = genes1.as_ref().iter().map(|gene| gene.id()).collect();
 
     // Count the intersection with the second list
-    genes2.as_ref().iter().filter(|gene| ids1.contains(gene.id())).count()
+    genes2
+        .as_ref()
+        .iter()
+        .filter(|gene| ids1.contains(gene.id()))
+        .count()
 }
