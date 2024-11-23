@@ -1,0 +1,18 @@
+[package]
+name = "dual_threshold_optimization"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+extendr-api = { version = "0.7.1", optional = true }
+pyo3 = { version = "0.23.1", features = ["extension-module"], optional = true }
+rand = "0.8.5"
+statrs = "0.17.1"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+r-bindings = ["extendr-api"]
+py-bindings = ["pyo3"]
