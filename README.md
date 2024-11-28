@@ -211,6 +211,28 @@ with the debug flags on:
 cargo build --profile release-debug
 ```
 
+To build the binaries for each OS, use `cross`
+
+```bash
+cargo add cross
+```
+
+Then build like this
+
+```bash
+# linux
+cross build --release --target x86_64-unknown-linux-gnu
+
+# windows
+cross build --release --target x86_64-pc-windows-gnu
+
+# MacOS -- intel
+cross build --release --target x86_64-apple-darwin
+
+# MacOS -- apple silicon
+cross build --release --target aarch64-apple-darwin
+```
+
 ### Test data
 
 Test data can be found in the `test_data` subdirectory
