@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0]
+## 2.0.0
 
 This is a complete re-write in Rust. In addition to changing the language, the
 the following modifications to the algorithm have been made:
@@ -39,7 +39,7 @@ nature of the hypergeometric p-value.
 1. tests
 1. an MPI implementation to parallelize across multiple machines
 
-## [1.0.0] -- Initial release
+## 1.0.0 -- Initial release
 
 This version was written by [Yiming Kang](https://github.com/yiming-kang) and is the
 version which was used to produce the results in
