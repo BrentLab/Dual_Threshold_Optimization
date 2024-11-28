@@ -31,6 +31,7 @@ see version 1.0.0, implemented by Yiming Kang.
     - [Development](#developer-installation-and-usage)
 - [Algorithmic Details](#algorithmic-details)
 - [Troubleshooting](#troubleshooting)
+- [Acknowledgements](#acknowledgements)
 
 ## Getting started
 
@@ -254,7 +255,7 @@ The following provides details on the DTO algorithm, step by step.
 1. Calculate false discovery rate (FDR)
 
     In the [DTO paper](https://doi.org/10.1101/gr.259655.119), an FDR is derived. This
-    FDR is estimated for the optimal threshold pair.:
+    FDR is estimated for the optimal threshold pair.
 
 
 ## Troubleshooting
@@ -272,3 +273,9 @@ it to your `LD_LIBRARY_PATH` manually. E.g.
 ```bash
 export LD_LIBRARY_PATH=/ref/mblab/software/spack-0.22.2/opt/spack/linux-rocky9-x86_64/gcc-11.4.1/openmpi-5.0.3-vjscapwoywmullqs3lj2mmdf7vyge4rk/lib:$LD_LIBRARY_PATH
 ```
+
+## Acknowledgements
+
+DTO was originally implemented by [Yiming Kang](https://github.com/yiming-kang). See version 1.0.0 for that
+implementation. That work was described in
+[Dual threshold optimization and network inference reveal convergent evidence from TF binding locations and TF perturbation responses](https://doi.org/10.1101/gr.259655.119)
