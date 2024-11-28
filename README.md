@@ -114,7 +114,7 @@ wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs
 wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist2.csv
 
 # run the binary
-dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 --t 1
+dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
 ```
 
 #### Output
