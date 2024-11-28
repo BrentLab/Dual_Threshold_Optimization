@@ -38,3 +38,9 @@ nature of the hypergeometric p-value.
 1. Docstrings with examples and module level documentation
 1. tests
 1. an MPI implementation to parallelize across multiple machines
+
+## [1.0.0] -- Initial release
+
+This version was written by [Yiming Kang](https://github.com/yiming-kang) and is the
+version which was used to produce the results in
+[Dual threshold optimization and network inference reveal convergent evidence from TF binding locations and TF perturbation responses](https://doi.org/10.1101/gr.259655.119)
