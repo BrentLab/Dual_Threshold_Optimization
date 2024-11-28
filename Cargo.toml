@@ -3,7 +3,12 @@ name = "dual_threshold_optimization"
 author = [
     "Chase Mateusiak <chasem@wustl.edu>"
 ]
-description = ""
+description = """
+Dual Threshold Optimization compares two ranked lists of features (e.g. genes) 
+to determine the rank threshold for each list that minimizes the hypergeometric 
+p-value of the overlap of features. It then calculates a permutation based 
+empirical p-value and an FDR. Details can be found [in this paper](https://doi.org/10.1101/gr.259655.119)
+"""
 version = "2.0.0"
 edition = "2021"
 readme = "README.md"
