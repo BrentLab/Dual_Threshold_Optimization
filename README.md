@@ -52,12 +52,6 @@ With the correct binary, you can print the help message like so:
 dual_threshold_optimization --help
 ```
 
-The following will be provided. Please note that you can find examples of the input
-lists and background here:
-
-- input list examples: [list1](test_data/ranklist1.csv), [list2](test_data/ranklist2.csv)
-- background example: [background](test_data/background.txt)
-
 ```bash
 Dual Threshold Optimization CLI
 
@@ -104,6 +98,23 @@ Options:
   -V, --version
           Print version
 
+```
+
+You can run this with the following minimal test data:
+<!-- TODO: update the links when this goes to the main branch -->
+- input list examples: [list1](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/ranklist1.csv), [list2](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/ranklist2.csv)
+- background example: [background](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/background.txt)
+
+like this
+
+```bash
+# download list1
+wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist1.csv
+# download list2
+wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist2.csv
+
+# run the binary
+dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 --t 1
 ```
 
 #### Output
@@ -199,6 +210,16 @@ with the debug flags on:
 ```bash
 cargo build --profile release-debug
 ```
+
+### Test data
+
+Test data can be found in the `test_data` subdirectory
+
+### Profiling
+
+I recommend profiling with [hyperfine](https://github.com/sharkdp/hyperfine)
+for runtime and [heaptrack](https://github.com/KDE/heaptrack) for memory.
+The results of profiling on the test data are in the `/profiling` subdirectory
 
 ## Algorithmic details
 
