@@ -41,7 +41,7 @@ two flavors of releases for each OS:
 1. **The standard release**: this is suitable for almost every user
 
 2. **An MPI enabled version**: only if you want to parallelize across multiple machines.
-**NOTE**: For this version, MPI must be installed on the host system.
+   **NOTE**: For this version, MPI must be installed on the host system.
 
 
 ### Using the cmd line
