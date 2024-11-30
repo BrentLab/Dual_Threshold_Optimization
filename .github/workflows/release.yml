@@ -110,7 +110,10 @@ jobs:
       # Step 5: Upload binaries to the release
       - name: Upload binaries to release
         run: |
-          for file in binaries/*; do
-            echo "Uploading $file"
-            gh release upload "v${{ env.version }}" "$file" --clobber
+          for file in binaries/*/*; do
+            if [ -f "$file" ]; then
+              echo "Uploading $file"
+              gh release upload "v${{ env.version }}" "$file" --clobber
+            fi
           done
+
