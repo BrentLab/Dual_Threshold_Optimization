@@ -3,4 +3,5 @@ repos:
       rev: v1.0
       hooks:
       -   id: fmt
+          args: ["--verbose"]
       -   id: cargo-check
