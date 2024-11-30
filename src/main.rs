@@ -105,11 +105,13 @@ fn main() {
         ranked_feature_list1.thresholds().len() * ranked_feature_list2.thresholds().len()
     );
 
-    let background = cli.background.map(|background_file| read_feature_list_from_file(
+    let background = cli.background.map(|background_file| {
+        read_feature_list_from_file(
             background_file
                 .to_str()
                 .expect("Invalid file path for background"),
-        ));
+        )
+    });
 
     let population_size = compute_population_size(
         &ranked_feature_list1,
@@ -138,7 +140,7 @@ fn main() {
 
             // if results is not an empty vector, then get the final results and print
             // them out
-            if results.len() > 0 {
+            if !results.is_empty() {
                 let final_result = empirical_pvalue(results);
                 println!("{}", serde_json::to_string_pretty(&final_result).unwrap());
             }

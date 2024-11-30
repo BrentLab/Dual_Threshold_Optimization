@@ -56,10 +56,10 @@ pub fn run(
     let world = universe.world();
 
     let rank = world.rank();
-    eprint!("MPI Rank: {}\n", rank);
+    eprintln!("MPI Rank: {}\n", rank);
 
     let n_processes = world.size();
-    eprint!("MPI Size: {}\n", n_processes);
+    eprintln!("MPI Size: {}\n", n_processes);
 
     // Step 1: Prepare filenames and population size
     let file1 = if rank == 0 {
@@ -113,7 +113,7 @@ pub fn run(
     // Step 7: Distribute tasks
     let task_chunks: Vec<Vec<Task>> = if rank == 0 {
         tasks
-            .chunks((tasks.len() + n_processes as usize - 1) / n_processes as usize)
+            .chunks(tasks.len().div_ceil(n_processes as usize))
             .map(|chunk| chunk.to_vec())
             .collect()
     } else {
@@ -126,7 +126,7 @@ pub fn run(
             let serialized_chunk = bincode::serialize(task_chunk).expect("Serialization failed");
             world.process_at_rank(i as i32).send(&serialized_chunk);
         }
-        task_chunks.get(0).cloned().unwrap_or_default()
+        task_chunks.first().cloned().unwrap_or_default()
     } else {
         let (received_data, _status) = world.process_at_rank(0).receive_vec::<u8>();
         bincode::deserialize(&received_data).expect("Deserialization failed")
