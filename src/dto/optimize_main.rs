@@ -18,7 +18,7 @@ pub fn optimize<'a>(
 
     if debug {
         // Return all results if debug is true
-        return OptimizationResult::Debug(results);
+        OptimizationResult::Debug(results)
     } else {
         // Filter for the best result based on current criteria
         let min_pvalue = results
@@ -47,10 +47,7 @@ pub fn optimize<'a>(
                 .max()
                 .unwrap();
 
-            best_results = best_results
-                .into_iter()
-                .filter(|res| res.intersection_size == max_intersect)
-                .collect();
+            best_results.retain(|res| res.intersection_size == max_intersect);
 
             // Notify the user if ties remain after filtering by intersection size
             if best_results.len() > 1 {
@@ -74,7 +71,7 @@ pub fn optimize<'a>(
 #[cfg(test)]
 mod tests {
     use crate::collections::{Feature, FeatureList, RankedFeatureList};
-    use crate::dto::{optimize_main, OptimizationResult};
+    use crate::dto::{optimize, OptimizationResult};
 
     #[test]
     fn test_full_optimization_with_permutation() {
@@ -113,7 +110,7 @@ mod tests {
         let population_size: usize = 10;
 
         // Run the optimization function with permutation enabled and no background
-        let result = optimize_main(&ranked1, &ranked2, false, population_size, false);
+        let result = optimize(&ranked1, &ranked2, false, population_size, false);
 
         // Ensure the optimization returned a valid best result
         assert!(matches!(result, OptimizationResult::Best(_)));
@@ -129,7 +126,7 @@ mod tests {
         }
 
         // Run the optimization function with permutation enabled and no background
-        let result_permuted = optimize_main(&ranked1, &ranked2, true, population_size, false);
+        let result_permuted = optimize(&ranked1, &ranked2, true, population_size, false);
 
         // Ensure the optimization returned a valid best result
         assert!(matches!(result_permuted, OptimizationResult::Best(_)));

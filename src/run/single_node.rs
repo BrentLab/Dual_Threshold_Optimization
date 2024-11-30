@@ -93,7 +93,7 @@ pub fn run(
 
     // Split the tasks into chunks
     let task_chunks: Vec<Vec<Task>> = tasks
-        .chunks((tasks.len() + num_threads - 1) / num_threads) // Avoid zero chunks if num_threads > tasks.len()
+        .chunks(tasks.len().div_ceil(num_threads)) // Avoid zero chunks if num_threads > tasks.len()
         .map(|chunk| chunk.to_vec())
         .collect();
 

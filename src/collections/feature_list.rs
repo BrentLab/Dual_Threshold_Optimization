@@ -34,6 +34,12 @@ pub struct FeatureList {
     genes: Vec<Feature>,
 }
 
+impl Default for FeatureList {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FeatureList {
     /// Create an empty `FeatureList`.
     ///

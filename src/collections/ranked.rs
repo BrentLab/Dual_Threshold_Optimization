@@ -36,7 +36,7 @@ pub struct RankedFeatureListItem<'a> {
     index: usize,
 }
 
-impl<'a> RankedFeatureListItem<'a> {
+impl RankedFeatureListItem<'_> {
     /// Returns a reference to the feature.
     pub fn feature(&self) -> &Feature {
         self.feature
@@ -131,6 +131,12 @@ pub struct RankedFeatureList {
     /// Precomputed thresholds derived from the ranks.
     thresholds: Vec<u32>,
     threshold_state: ThresholdState,
+}
+
+impl Default for RankedFeatureList {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl RankedFeatureList {

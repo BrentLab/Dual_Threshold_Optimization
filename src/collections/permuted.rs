@@ -64,11 +64,11 @@ impl<'a> PermutedRankedFeatureList<'a> {
     }
 
     pub fn ranks(&self) -> &[u32] {
-        &self.original.ranks()
+        self.original.ranks()
     }
 }
 
-impl<'a> FeatureSetProvider for PermutedRankedFeatureList<'a> {
+impl FeatureSetProvider for PermutedRankedFeatureList<'_> {
     /// Retrieves genes from the `PermutedRankedFeatureList` with ranks <= the given threshold.
     ///
     /// This implementation ensures the genes are accessed in a randomized order, based on
