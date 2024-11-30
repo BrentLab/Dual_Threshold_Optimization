@@ -11,6 +11,9 @@ on:
       - Rust Linting and Formatting
     types:
       - completed
+  
+env:
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   build:
