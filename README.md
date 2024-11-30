@@ -56,13 +56,23 @@ binary called `dual_threshold_optimization-macos-latest-default` from the releas
 tab. There is also a windows executable, and both a default (non-mpi) and mpi version
 for ubuntu (which will work on most linux OS).
 
-You will need to
-make this executable by entering
-`chmod +x dual_threshold_optimization-macos-latest-default` in your terminal.  
+You will need to make this executable by entering
 
-You may also want to rename the executable to something more manageable, eg
-`mv dual_threshold_optimization-macos-latest-default dual_threshold_optimization` to
-rename it to simply `dual_threshold_optimization`.
+```bash
+chmod +x dual_threshold_optimization-macos-latest-default
+```
+
+in your terminal. For windows, if you are not using the terminal, consult the internet
+for the equivalent.
+
+You may also want to rename the executable to something more manageable, eg from the
+terminal
+
+```bash
+mv dual_threshold_optimization-macos-latest-default dual_threshold_optimization
+```
+
+to rename it to simply `dual_threshold_optimization`.
 
 
 ### Using the cmd line
@@ -139,7 +149,7 @@ dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
 ```
 This will output some run information to stderr, and a json to stdout. This is
 important because it means that you can re-direct the stdout to a file
-(see [output](#output))
+(see below)
 
 #### Output
 
@@ -212,12 +222,6 @@ At this point, you can run the tests with:
 cargo test
 ```
 
-or
-
-```bash
-cargo test
-```
-
 you can run the binary with
 
 ```bash
@@ -230,44 +234,26 @@ and you can guild with
 cargo build
 ```
 
-Note that there is a build profile for profiling which will build a release version
-with the debug flags on:
+Note that there is a build profile for time and memory performance profiling which will build
+a release version with the debug flags on:
 
 ```bash
 cargo build --profile release-debug
 ```
 
-To build the binaries for each OS, use `cross`
-
-```bash
-cargo add cross
-```
-
-Then build like this
-
-```bash
-# linux
-cross build --release --target x86_64-unknown-linux-gnu
-
-# windows
-cross build --release --target x86_64-pc-windows-gnu
-
-# MacOS -- intel
-cross build --release --target x86_64-apple-darwin
-
-# MacOS -- apple silicon
-cross build --release --target aarch64-apple-darwin
-```
-
 ### Test data
 
-Test data can be found in the `test_data` subdirectory
+Minimal test data can be found in the `test_data` subdirectory
 
-### Profiling
+### Performance Profiling
 
 I recommend profiling with [hyperfine](https://github.com/sharkdp/hyperfine)
 for runtime and [heaptrack](https://github.com/KDE/heaptrack) for memory.
 The results of profiling on the test data are in the `/profiling` subdirectory
+
+### Pre-commit
+
+Pre-commit is set up to run cargo fmt and clippy when you commit changes
 
 ## Algorithmic details
 
