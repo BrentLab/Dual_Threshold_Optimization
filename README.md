@@ -43,6 +43,27 @@ two flavors of releases for each OS:
 2. **An MPI enabled version**: only if you want to parallelize across multiple machines.
    **NOTE**: For this version, MPI must be installed on the host system.
 
+You can download pre-compiled binary for your operating system in the `releases` tab.
+MPI versions only exist for ubuntu. If one of the provided binaries doesn't work for
+your operating system, you can use the
+[developer instructions](#developer-installation-and-usage) to download the rust
+toolchain and compile a binary. Alternatively, open an Issue and we will help.  
+
+### Installation
+
+If you are on a Mac, for example, and you do not need MPI, then you would download the
+binary called `dual_threshold_optimization-macos-latest-default` from the releases
+tab. There is also a windows executable, and both a default (non-mpi) and mpi version
+for ubuntu (which will work on most linux OS).
+
+You will need to
+make this executable by entering
+`sudo chmod +x dual_threshold_optimization-macos-latest-default` in your terminal.  
+
+You may also want to rename the executable to something more manageable, eg
+`mv dual_threshold_optimization-macos-latest-default dual_threshold_optimization` to
+rename it to simply `dual_threshold_optimization`.
+
 
 ### Using the cmd line
 
@@ -116,6 +137,9 @@ wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs
 # run the binary
 dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
 ```
+This will output some run information to stderr, and a json to stdout. This is
+important because it means that you can re-direct the stdout to a file
+(see [output](#output))
 
 #### Output
 
@@ -123,22 +147,24 @@ The output from the cmd line is a json to stdout. To redirect this to a file, yo
 would do the following:
 
 ```bash
-dual_threshold_optimization -1 list1.csv -2 $list2.csv -p 1000 -t 24 > output.json
+
+dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
+ > output.json
 ```
 
 This is what the output will look like:
 
 ```json
 {
-    "empirical_pvalue": 0.0,
-    "fdr": 0.3481243441762854,
-    "population_size": 14295,
-    "rank1": 1016,
-    "rank2": 896,
-    "set1_len": 1016,
-    "set2_len": 896,
-    "unpermuted_intersection_size": 127,
-    "unpermuted_pvalue": 1.5719992077514072e-14
+  "empirical_pvalue": 0.8,
+  "fdr": 0.0,
+  "population_size": 30,
+  "rank1": 24,
+  "rank2": 13,
+  "set1_len": 24,
+  "set2_len": 13,
+  "unpermuted_intersection_size": 12,
+  "unpermuted_pvalue": 0.15632183908046102
 }
 ```
 
