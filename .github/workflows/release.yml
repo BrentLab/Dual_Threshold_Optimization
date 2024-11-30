@@ -109,6 +109,5 @@ jobs:
         run: |
           for file in binaries/*; do
             echo "Uploading $file"
-            filename=$(basename "$file")
-            gh release upload "v${{ env.version }}" "$file" --name "$filename" --clobber
+            gh release upload "v${{ env.version }}" "$file" --clobber
           done
