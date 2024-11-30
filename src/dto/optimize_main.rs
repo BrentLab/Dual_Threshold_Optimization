@@ -1,7 +1,6 @@
 use crate::collections::RankedFeatureList;
 use crate::dto::{process_threshold_pairs, OptimizationResult};
 
-
 pub fn optimize<'a>(
     ranked_feature_list1: &RankedFeatureList,
     ranked_feature_list2: &RankedFeatureList,
@@ -123,10 +122,12 @@ mod tests {
             assert_eq!(best.rank1, 3);
             assert_eq!(best.rank2, 4);
             assert_eq!(best.pvalue, 0.33333333333333337);
-            println!("Best result: Rank1 {}, Rank2 {}, P-value {}", 
-                best.rank1, best.rank2, best.pvalue);
+            println!(
+                "Best result: Rank1 {}, Rank2 {}, P-value {}",
+                best.rank1, best.rank2, best.pvalue
+            );
         }
-        
+
         // Run the optimization function with permutation enabled and no background
         let result_permuted = optimize_main(&ranked1, &ranked2, true, population_size, false);
 
@@ -137,8 +138,10 @@ mod tests {
             // assert_ne!(best.rank1, 2);
             // assert_ne!(best.rank2, 1);
             // assert_ne!(best.pvalue, 0.2);
-            println!("Best result: Rank1 {}, Rank2 {}, P-value {}", 
-                best.rank1, best.rank2, best.pvalue);
+            println!(
+                "Best result: Rank1 {}, Rank2 {}, P-value {}",
+                best.rank1, best.rank2, best.pvalue
+            );
         }
     }
 }

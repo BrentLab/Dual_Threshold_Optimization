@@ -1,5 +1,5 @@
 //! # Compare ranked feature lists over all threshold pairs.
-//! 
+//!
 //! This is the core logic of the `optimize` function. It performs a double for loop
 //! over all threshold pairs. For each threshold pair, it extracts the feature sets
 //! and computes the pvalue of the intersection. The asymptotic complexity of this
@@ -9,8 +9,8 @@ use std::collections::HashMap;
 
 use crate::collections::{FeatureSetProvider, PermutedRankedFeatureList, RankedFeatureList};
 
-use crate::stat_operations::{hypergeometric_pvalue, intersect_genes};
 use crate::dto::{FeatureSets, OptimizationResultRecord};
+use crate::stat_operations::{hypergeometric_pvalue, intersect_genes};
 
 /// Performs threshold pair optimization.
 ///
@@ -25,9 +25,9 @@ use crate::dto::{FeatureSets, OptimizationResultRecord};
 ///
 /// # Returns
 /// A vector of `OptimizationResultRecord`s.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use dual_threshold_optimization::collections::{Feature, FeatureList, PermutedRankedFeatureList, RankedFeatureList};
 /// use dual_threshold_optimization::dto::{optimize, OptimizationResult, process_threshold_pairs};
@@ -53,10 +53,10 @@ use crate::dto::{FeatureSets, OptimizationResultRecord};
 /// ]);
 /// let ranks2 = vec![1, 2, 3];
 /// let ranked_feature_list2 = RankedFeatureList::from(genes2, ranks2).unwrap();
-/// 
+///
 /// let permuted_list1 = PermutedRankedFeatureList::new(&ranked_feature_list1);
 /// let permuted_list2 = PermutedRankedFeatureList::new(&ranked_feature_list2);
-/// 
+///
 /// let results = process_threshold_pairs(
 ///    &ranked_feature_list1,
 ///    &ranked_feature_list2,
@@ -64,9 +64,9 @@ use crate::dto::{FeatureSets, OptimizationResultRecord};
 ///    4,
 ///    false,
 /// );
-/// 
+///
 /// assert_eq!(results.len(), 9);
-/// 
+///
 /// ```
 pub fn process_threshold_pairs(
     ranked_feature_list1: &RankedFeatureList,
@@ -89,20 +89,18 @@ pub fn process_threshold_pairs(
         };
 
         for &threshold2 in ranked_feature_list2.thresholds().iter() {
-            let genes2 = feature_sets_cache
-                .entry(threshold2)
-                .or_insert_with(|| {
-                    if use_permutation {
-                        permuted_list2.get_feature_set_by_threshold(threshold2)
-                    } else {
-                        ranked_feature_list2.get_feature_set_by_threshold(threshold2)
-                    }
+            let genes2 = feature_sets_cache.entry(threshold2).or_insert_with(|| {
+                if use_permutation {
+                    permuted_list2.get_feature_set_by_threshold(threshold2)
+                } else {
+                    ranked_feature_list2.get_feature_set_by_threshold(threshold2)
+                }
             });
 
             let intersection_size = intersect_genes(&genes1, &genes2);
 
             let population_size = population_size as u64;
-            
+
             let pvalue = hypergeometric_pvalue(
                 population_size,
                 genes1.len() as u64,
@@ -155,13 +153,8 @@ mod tests {
         let ranks2 = vec![1, 2, 3];
         let ranked_feature_list2 = RankedFeatureList::from(genes2, ranks2).unwrap();
 
-        let results = process_threshold_pairs(
-            &ranked_feature_list1,
-            &ranked_feature_list2,
-            true,
-            4,
-            false,
-        );
+        let results =
+            process_threshold_pairs(&ranked_feature_list1, &ranked_feature_list2, true, 4, false);
 
         assert!(!results.is_empty());
         for record in results {
@@ -227,5 +220,4 @@ mod tests {
             assert!(record.pvalue >= 0.0);
         }
     }
-
 }

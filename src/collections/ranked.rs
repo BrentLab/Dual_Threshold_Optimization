@@ -1,5 +1,5 @@
 //! A struct for storing a `FeatureList` along with their corresponding ranks.
-//! 
+//!
 //! This module supports `RankedFeatureList` to store ranked genes and offers methods
 //! to manage, sort, and analyze ranked feature lists.
 use serde::{Deserialize, Serialize};
@@ -9,23 +9,23 @@ use crate::collections::{Feature, FeatureList, FeatureSetProvider};
 /// A struct that represents a single feature in a `RankedFeatureList`.
 /// This struct is used to provide access to the gene, its rank,
 /// and its index in the list.
-/// 
+///
 /// # Fields
-/// 
+///
 /// - `gene`: A reference to the feature.
 /// - `rank`: The rank of the feature.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use dual_threshold_optimization::collections::{Feature, FeatureList, RankedFeatureList, RankedFeatureListItem};
-/// 
+///
 /// let genes = FeatureList::from(vec![Feature::from("gene1"), Feature::from("gene2")]);
 /// let ranks = vec![1, 2];
 /// let ranked_list = RankedFeatureList::from(genes, ranks).unwrap();
-/// 
+///
 /// let item = ranked_list.get(1).unwrap();
-/// 
+///
 /// assert_eq!(item.feature().id(), "gene2");
 /// assert_eq!(item.rank(), 2);
 /// ```
@@ -99,7 +99,6 @@ pub enum RemoveIndices {
     Single(usize),
     Multiple(Vec<usize>),
 }
-
 
 /// A struct that represents a collection of `Feature` instances (`FeatureList`) and
 /// their corresponding ranks.
@@ -337,11 +336,10 @@ impl RankedFeatureList {
         }
 
         // set the final threshold to the maximum rank
-        if let Some(last) = self.thresholds.last_mut()
-        {
+        if let Some(last) = self.thresholds.last_mut() {
             *last = max_rank;
         }
-        
+
         self.thresholds = thresholds;
     }
 
@@ -565,7 +563,6 @@ pub struct RankedFeatureListIterator<'a> {
 }
 
 impl RankedFeatureList {
-    
     /// Create an iterator for the `RankedFeatureList`.
     ///
     /// # Examples

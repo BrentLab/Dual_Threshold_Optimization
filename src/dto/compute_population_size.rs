@@ -1,10 +1,10 @@
 //! # Compute the population size of two sets
-//! 
+//!
 //! `compute_population_size` validates the compatibility of the two
 //! `RankedFeatureList`s and, optionally, a background `FeatureList`. If the background
 //! is not provided, then the two ranked feature lists must have identical feature sets.
 //! If the background is provided, then the two lists must be subsets of the background.
-use crate::collections::{RankedFeatureList, FeatureList};
+use crate::collections::{FeatureList, RankedFeatureList};
 
 /// Computes the population size and validates the compatibility of the background.
 ///
@@ -78,7 +78,9 @@ pub fn compute_population_size(
             if intersection_size != ranked_feature_list1.len()
                 || intersection_size != ranked_feature_list2.len()
             {
-                panic!("If no background is provided, the feature lists must have identical genes.");
+                panic!(
+                    "If no background is provided, the feature lists must have identical genes."
+                );
             }
             intersection_size
         }
@@ -107,7 +109,9 @@ mod tests {
     use crate::collections::{Feature, FeatureList, RankedFeatureList};
 
     #[test]
-    #[should_panic(expected = "If no background is provided, the feature lists must have identical genes.")]
+    #[should_panic(
+        expected = "If no background is provided, the feature lists must have identical genes."
+    )]
     fn test_compute_population_size_no_background_mismatched_lists() {
         let features1 = FeatureList::from(vec![
             Feature::from("gene1"),
@@ -130,7 +134,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "The following genes in the first ranked feature list are not in the background:")]
+    #[should_panic(
+        expected = "The following genes in the first ranked feature list are not in the background:"
+    )]
     fn test_compute_population_size_missing_genes_in_background_list1() {
         let features1 = FeatureList::from(vec![
             Feature::from("gene1"),
@@ -162,7 +168,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "The following genes in the second ranked feature list are not in the background:")]
+    #[should_panic(
+        expected = "The following genes in the second ranked feature list are not in the background:"
+    )]
     fn test_compute_population_size_missing_genes_in_background_list2() {
         let features1 = FeatureList::from(vec![
             Feature::from("gene1"),
@@ -218,8 +226,11 @@ mod tests {
             Feature::from("gene4"), // Extra gene in the background
         ]);
 
-        let population_size =
-            compute_population_size(&ranked_feature_list1, &ranked_feature_list2, Some(&background));
+        let population_size = compute_population_size(
+            &ranked_feature_list1,
+            &ranked_feature_list2,
+            Some(&background),
+        );
         assert_eq!(population_size, 4); // Background size
     }
 

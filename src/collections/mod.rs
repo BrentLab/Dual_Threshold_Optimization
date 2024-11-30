@@ -7,12 +7,12 @@ pub mod feature;
 pub mod feature_list;
 pub mod permuted;
 pub mod ranked;
-pub mod unique_check;
 pub mod traits;
+pub mod unique_check;
 
 pub use feature::Feature;
 pub use feature_list::FeatureList;
-pub use ranked::{RankedFeatureList, RankedFeatureListItem, RemoveIndices, ThresholdState};
 pub use permuted::PermutedRankedFeatureList;
-pub use unique_check::UniqueCheck;
+pub use ranked::{RankedFeatureList, RankedFeatureListItem, RemoveIndices, ThresholdState};
 pub use traits::FeatureSetProvider;
+pub use unique_check::UniqueCheck;

@@ -41,7 +41,11 @@ where
     T2: AsRef<[Feature]>,
 {
     // Collect IDs from the first list into a HashSet
-    let ids1: HashSet<_> = genes1.as_ref().iter().map(|feature: &Feature| feature.id()).collect();
+    let ids1: HashSet<_> = genes1
+        .as_ref()
+        .iter()
+        .map(|feature: &Feature| feature.id())
+        .collect();
 
     // Count the intersection with the second list
     genes2

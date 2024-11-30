@@ -1,20 +1,20 @@
 //! # Execute a set of optimization tasks using MPI for distributed processing.
-//! 
+//!
 //! This function is used to execute a set of optimization tasks in parallel by first
-//! dividing the tasks into roughly equal parts and broadcasting them to the MPI 
+//! dividing the tasks into roughly equal parts and broadcasting them to the MPI
 //! processes. On those MPI processes, if multiple threads are available, those tasks
 //! can be further parallelized. A `Task` is defined as a call to `optimize` and a set of
 //! tasks is expected to be a list of at least length 1 where at least one task is
 //! the unpermuted optimization and the rest are permutations which will be used to
 //! calculate the empirical p-value of the unpermuted optimization.
 #[cfg(feature = "mpi")]
-use bincode;
+use crate::read::read_ranked_feature_list_from_csv;
 #[cfg(feature = "mpi")]
-use mpi::traits::*;
+use bincode;
 #[cfg(feature = "mpi")]
 use mpi::topology::Communicator;
 #[cfg(feature = "mpi")]
-use crate::read::read_ranked_feature_list_from_csv;
+use mpi::traits::*;
 
 #[cfg(feature = "mpi")]
 use crate::run::run_single_node;
@@ -62,8 +62,16 @@ pub fn run(
     eprint!("MPI Size: {}\n", n_processes);
 
     // Step 1: Prepare filenames and population size
-    let file1 = if rank == 0 { ranked_list1_path.to_string() } else { String::new() };
-    let file2 = if rank == 0 { ranked_list2_path.to_string() } else { String::new() };
+    let file1 = if rank == 0 {
+        ranked_list1_path.to_string()
+    } else {
+        String::new()
+    };
+    let file2 = if rank == 0 {
+        ranked_list2_path.to_string()
+    } else {
+        String::new()
+    };
     let mut population_size = if rank == 0 { population_size } else { 0 };
 
     // Step 2: Broadcast filename sizes
@@ -85,7 +93,9 @@ pub fn run(
     // Step 4: Broadcast filenames and population size
     world.process_at_rank(0).broadcast_into(&mut buffer1);
     world.process_at_rank(0).broadcast_into(&mut buffer2);
-    world.process_at_rank(0).broadcast_into(&mut population_size);
+    world
+        .process_at_rank(0)
+        .broadcast_into(&mut population_size);
 
     // Step 5: Convert buffers back to strings
     let file1 = String::from_utf8(buffer1).expect("Failed to convert buffer1 to string");

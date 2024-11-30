@@ -1,18 +1,17 @@
 //! # Execute a set of optimization tasks in parallel on a single shared memory device.
-//! 
+//!
 //! This function is used to execute a set of optimization tasks in parallel on a single
 //! shared memory device. A `Task` is defined as a call to `optimize` and a set of
 //! tasks is expected to be a list of at least length 1 where at least one task is
 //! the unpermuted optimization and the rest are permutations which will be used to
 //! calculate the empirical p-value of the unpermuted optimization.
-use std::sync::{Arc, Mutex};
 use std::clone::Clone;
+use std::sync::{Arc, Mutex};
 
 use crate::collections::RankedFeatureList;
-use crate::optimize;
 use crate::dto::OptimizationResult;
+use crate::optimize;
 use crate::run::Task;
-
 
 /// Executes multiple tasks for dual threshold optimization in parallel.
 ///
@@ -137,11 +136,13 @@ pub fn run(
     Arc::try_unwrap(results).unwrap().into_inner().unwrap()
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::{Arc, Mutex, atomic::{AtomicUsize, Ordering}};
+    use std::sync::{
+        atomic::{AtomicUsize, Ordering},
+        Arc, Mutex,
+    };
     use std::thread;
 
     use crate::collections::{Feature, FeatureList};
@@ -150,13 +151,21 @@ mod tests {
     fn test_parallel_execution_with_multiple_threads() {
         // Create dummy RankedFeatureLists
         let ranked_feature_list1 = RankedFeatureList::from(
-            FeatureList::from(vec![Feature::from("gene1"), Feature::from("gene2"), Feature::from("gene3")]),
+            FeatureList::from(vec![
+                Feature::from("gene1"),
+                Feature::from("gene2"),
+                Feature::from("gene3"),
+            ]),
             vec![1, 2, 3],
         )
         .unwrap();
 
         let ranked_feature_list2 = RankedFeatureList::from(
-            FeatureList::from(vec![Feature::from("gene1"), Feature::from("gene2"), Feature::from("gene4")]),
+            FeatureList::from(vec![
+                Feature::from("gene1"),
+                Feature::from("gene2"),
+                Feature::from("gene4"),
+            ]),
             vec![1, 2, 3],
         )
         .unwrap();
@@ -215,10 +224,12 @@ mod tests {
 
         // Assert that at some point we had multiple active threads
         let max_threads = *max_active_threads.lock().unwrap();
-        assert!(max_threads > 1, "Expected multiple threads to run simultaneously, but found only one active thread.");
+        assert!(
+            max_threads > 1,
+            "Expected multiple threads to run simultaneously, but found only one active thread."
+        );
     }
 }
-
 
 // The following was a previous implementation of the run_single_node function
 // which did not use the Arc<Mutex<Vec<OptimizationResult>>> for thread-safe

@@ -1,5 +1,5 @@
 //! Read in a CSV file containing features (e.g. genes) and their ranks.
-//! 
+//!
 //! This module provides a function to read in a CSV file containing features
 //! and their ranks, returning a `RankedFeatureList` object. The file is expected to
 //! be a CSV file with two columns: `gene` and `rank` **without a header**. The ranks
@@ -7,7 +7,7 @@
 //! `max` method where all features with with identical underlying scores are assigned
 //! the same integer rank.
 use std::fs::File;
-use std::io::{BufReader, BufRead};
+use std::io::{BufRead, BufReader};
 use std::vec::Vec;
 
 use crate::collections::{Feature, FeatureList, RankedFeatureList};
@@ -65,5 +65,6 @@ pub fn read_ranked_feature_list_from_csv(filepath: &str) -> RankedFeatureList {
         ranks.push(rank as u32);
     }
 
-    RankedFeatureList::from(FeatureList::from(genes), ranks).expect("Failed to create RankedFeatureList")
+    RankedFeatureList::from(FeatureList::from(genes), ranks)
+        .expect("Failed to create RankedFeatureList")
 }

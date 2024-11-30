@@ -1,13 +1,13 @@
 //! Calculate an empirical p-value for an unpermuted optimization result.
-//! 
+//!
 //! Given a set of `OptimizationResult`s, where exactly one is expected to be
 //! unpermuted, calculate a null distribution of p-values from the permuted set
 //! and compare the unpermuted p-value to the null distribution to calculate
 //! an empirical p-value. If only an unpermuted result is provided, the empirical
 //! is set to 1.0 arbitrarily.
-use serde_json::json;
 use crate::dto::OptimizationResult;
 use crate::stat_operations::fdr;
+use serde_json::json;
 
 /// Calculates the empirical p-value based on an unpermuted optimization result
 /// and a collection of permuted results.
@@ -108,9 +108,8 @@ use crate::stat_operations::fdr;
 /// ```
 pub fn empirical_pvalue(results: Vec<OptimizationResult>) -> serde_json::Value {
     // Separate the unpermuted result and the permuted results
-    let (unpermuted_results, permuted_results): (Vec<_>, Vec<_>) = results
-        .into_iter()
-        .partition(|result| match result {
+    let (unpermuted_results, permuted_results): (Vec<_>, Vec<_>) =
+        results.into_iter().partition(|result| match result {
             OptimizationResult::Best(record) => !record.permuted,
             _ => false,
         });
@@ -134,13 +133,13 @@ pub fn empirical_pvalue(results: Vec<OptimizationResult>) -> serde_json::Value {
         _ => panic!("Unexpected result type for unpermuted optimization"),
     };
 
-
     let estimated_fdr: f64 = fdr(
         unpermuted_result.set1_len,
         unpermuted_result.set2_len,
         unpermuted_result.intersection_size,
         unpermuted_result.population_size,
-        0.8);
+        0.8,
+    );
 
     // If there's only one result, set empirical p-value to 1.0 and return
     if permuted_results.is_empty() {
@@ -172,7 +171,7 @@ pub fn empirical_pvalue(results: Vec<OptimizationResult>) -> serde_json::Value {
         .filter(|&&p| p <= unpermuted_pvalue)
         .count() as f64
         / permuted_pvalues.len() as f64;
-    
+
     // Return results as JSON
     json!({
         "rank1": unpermuted_result.rank1,
@@ -186,8 +185,6 @@ pub fn empirical_pvalue(results: Vec<OptimizationResult>) -> serde_json::Value {
         "fdr": estimated_fdr,
     })
 }
-
-
 
 // pub fn empirical_pvalue(
 //     unpermuted_result: OptimizationResult,

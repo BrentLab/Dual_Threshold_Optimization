@@ -1,5 +1,5 @@
 //! # Represents a single feature (e.g. gene)
-//! 
+//!
 //! This struct is used as the type which is stored in a vector in `FeatureList`
 use serde::{Deserialize, Serialize};
 

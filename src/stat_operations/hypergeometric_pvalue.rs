@@ -1,5 +1,5 @@
 //! Calculate the hypergeometric p-value for two sets
-use statrs::distribution::{Hypergeometric, DiscreteCDF};
+use statrs::distribution::{DiscreteCDF, Hypergeometric};
 
 /// Calculate the hypergeometric p-value.
 ///
@@ -26,7 +26,7 @@ use statrs::distribution::{Hypergeometric, DiscreteCDF};
 ///
 /// let p_value = hypergeometric_pvalue(1000, 50, 60, 10);
 /// assert_eq!(p_value, 0.00044068070222441115);
-/// 
+///
 /// let p_value = hypergeometric_pvalue(6060, 5808, 154, 153);
 /// assert_eq!(p_value, 0.010413637619010246);
 /// ```
@@ -40,7 +40,7 @@ pub fn hypergeometric_pvalue(
     let hypergeom = Hypergeometric::new(population_size, successes_in_population, sample_size)
         .expect("Failed to create hypergeometric distribution");
 
-        // Handle the edge case where observed_overlap is 0
+    // Handle the edge case where observed_overlap is 0
     if observed_overlap == 0 {
         return 1.0; // P(X >= 0) is always 1
     }

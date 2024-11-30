@@ -7,4 +7,4 @@ pub mod stat_operations;
 
 // Re-export for easier access from the core module
 pub use collections::{PermutedRankedFeatureList, RankedFeatureList};
-pub use dto::optimize; 
+pub use dto::optimize;

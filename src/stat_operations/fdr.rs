@@ -16,7 +16,7 @@
 ///
 /// ```
 /// use dual_threshold_optimization::stat_operations::fdr;
-/// 
+///
 /// let ranked_list_1_len = 200; // Size of set B
 /// let ranked_list_2_len = 150; // Size of set R
 /// let overlap_len = 50; // Size of R ∩ B

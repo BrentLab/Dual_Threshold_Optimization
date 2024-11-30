@@ -1,5 +1,5 @@
 //! # Statistical operations
-//! 
+//!
 //! This module contains functions to calculate p-values and other statistical
 //! measures.
 pub mod empirical_pvalue;

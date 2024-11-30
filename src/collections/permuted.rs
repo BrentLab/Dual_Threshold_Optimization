@@ -101,7 +101,6 @@ impl<'a> FeatureSetProvider for PermutedRankedFeatureList<'a> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,8 +137,9 @@ mod tests {
 
         // Assert that the order is not the same as the input order
         let expected_genes: Vec<Feature> = genes.iter().take(10).cloned().collect();
-        assert_ne!(genes_below_threshold, expected_genes, "Features should not be in the same order after permutation");
+        assert_ne!(
+            genes_below_threshold, expected_genes,
+            "Features should not be in the same order after permutation"
+        );
     }
-
-
 }

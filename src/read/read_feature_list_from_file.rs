@@ -1,14 +1,13 @@
 //! A utility to read in a list of features (e.g. genes) from a file
-//! 
+//!
 //! The file is expected to be a single column with no header where each row
 //! contains a single feature identifier. This is used to read in the optional
 //! background set.
 use std::fs::File;
-use std::io::{BufReader, BufRead};
+use std::io::{BufRead, BufReader};
 use std::vec::Vec;
 
 use crate::collections::{Feature, FeatureList};
-
 
 /// Reads a file containing a list of genes (one per line) to create a `FeatureList`.
 ///
@@ -33,7 +32,7 @@ use crate::collections::{Feature, FeatureList};
 ///
 /// let temp_path = temp_dir().join("temp_genes.csv");
 /// let temp_file = temp_path.to_str().unwrap();
-/// 
+///
 /// // Write test data to the temporary file
 /// let mut file = File::create(temp_file).unwrap();
 /// writeln!(file, "gene1").unwrap();

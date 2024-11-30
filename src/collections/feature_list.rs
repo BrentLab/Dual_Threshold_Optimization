@@ -1,13 +1,13 @@
 //! # A structure for storing and manipulating a list of `Feature` instances.
-//! 
+//!
 //! The `FeatureList` struct provides methods for managing and validating a
-//! collection of `Feature` structs which may represent, for example, genes or 
+//! collection of `Feature` structs which may represent, for example, genes or
 //! transcripts.
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::ops::Index;
 
-use serde::{Deserialize,Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::collections::{Feature, UniqueCheck};
 
@@ -324,7 +324,10 @@ impl FeatureList {
             self.genes()
                 .iter()
                 .chain(other.genes().iter())
-                .filter(|feature| ids1.symmetric_difference(&ids2).any(|&id| id == feature.id()))
+                .filter(|feature| {
+                    ids1.symmetric_difference(&ids2)
+                        .any(|&id| id == feature.id())
+                })
                 .collect()
         } else {
             self.genes()
@@ -388,7 +391,10 @@ impl<'a> IntoIterator for &'a FeatureList {
 
 impl From<Vec<String>> for FeatureList {
     fn from(ids: Vec<String>) -> Self {
-        let genes: Vec<Feature> = ids.into_iter().map(|id| Feature::from(id.as_str())).collect();
+        let genes: Vec<Feature> = ids
+            .into_iter()
+            .map(|id| Feature::from(id.as_str()))
+            .collect();
         FeatureList { genes }
     }
 }
