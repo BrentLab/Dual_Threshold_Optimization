@@ -1,5 +1,6 @@
 # Dual Threshold Optimization
-
+[![Rust Tests](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/tests.yml/badge.svg)](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/tests.yml)
+[![Rust Linting and Formatting](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/linting.yml/badge.svg)](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/linting.yml)
 
 This library provides a comprehensive toolkit for performing
 [Dual Threshold Optimization](https://doi.org/10.1101/gr.259655.119) (DTO)
