@@ -58,7 +58,7 @@ for ubuntu (which will work on most linux OS).
 
 You will need to
 make this executable by entering
-`sudo chmod +x dual_threshold_optimization-macos-latest-default` in your terminal.  
+`chmod +x dual_threshold_optimization-macos-latest-default` in your terminal.  
 
 You may also want to rename the executable to something more manageable, eg
 `mv dual_threshold_optimization-macos-latest-default dual_threshold_optimization` to
