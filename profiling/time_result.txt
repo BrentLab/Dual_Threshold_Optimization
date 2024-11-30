@@ -1,0 +1,45 @@
+time ./target-debug/release-debug/dual_threshold_optimization -1 tmp/ranklist1_long.csv -2 tmp/ranklist2_long.csv -p 1000 --threads 28
+
+Ranked list 1: tmp/ranklist1_long.csv
+Ranked list 2: tmp/ranklist2_long.csv
+No background list provided.
+Permutations: 1000
+Threads: 28
+Multi-node mode: disabled
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+{
+  "empirical_pvalue": 1.0,
+  "rank1": 774,
+  "rank2": 9870,
+  "unpermuted_pvalue": 0.0019156219752836144
+}
+./target-debug/release-debug/dual_threshold_optimization -1  -2  -p 1000  28  65177.79s user 182.88s system 2422% cpu 44:57.54 total
+

@@ -1,98 +1,324 @@
-# Dual Threshold Optimzation (DTO)
-Dual Threshold Optimization (DTO) is a method that sets the thresholds for TF binding and TF-perturbation response by considering both data sets together. DTO chooses, for each TF, the pair of (binding, response) thresholds that minimizes the probability that the overlap between the bound and responsive sets results from random gene selection. 
+# Dual Threshold Optimization
 
-In addition to identifying convergence of binding and response, this tool may also be extended for analyzing any pair of datasets, in which the data entries can be ranked. For example, you may identify the convergence of two RNA-seq replicates.
 
-## Requirement and Setup
-#### 1. Virtual environment
-Create a conda virtual env ([miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://anaconda.org/anaconda/conda)) and install modules.
-```
-conda create -n dto python=3.6
-conda activate dto
-conda install scipy numpy pandas 
-conda install -c conda-forge multiprocess
-```
-#### 2. [Optional] Job queuing system
-Job queuing system [SLURM](http://slurm.schedmd.com/documentation.html) is preferred to enable high-throughput computing. SLURM version tested: 
-```
-slurm-wlm 17.11.7
-```  
+This library provides a comprehensive toolkit for performing
+[Dual Threshold Optimization](https://doi.org/10.1101/gr.259655.119) (DTO)
+originally proposed by Kang et al.  
 
-## Input Data
-#### 1. Transcriptional responses to TF perturbation
-A data matrix of the levels of transcriptional responses to TF perturbations, where columns represent the individual perturbed TFs and rows represent the genes. Each column is expected to be the output of differential expression analysis that compares the expression profiles of TF perturbation and pre-preturbation samples. The entry can either be represented as log fold-change or P-value. The file should be in CSV format with TFs as column names in the first row and genes as row names in the first column. 
+DTO compares two ranked lists of features (e.g. genes) to determine the rank
+threshold for each list that minimizes the hypergeometric p-value of the overlap
+of features. This method was originally applied to comparing the results of a
+paired set of binding assay results and perturbation assay results for a given
+transcription factor, but could be used with any two ranked lists of features. 
 
-#### 2. TF binding strengths
-A data matrix of the binding strengths, where columns represent the individual assayed TFs and rows represent the genes. Each entry can be represented as occupancy level or statistical significance of the TF binding events occur on the gene's regulatory region (promoters and/or enhancers). For the gene that have multiple peaks at its regulatory region, you may use the sum or max of the binding strengths of those peaks. The file should be in CSV format with TFs as column names in the first row and genes as row names in the first column.
+DTO provides the following statistics on the optimal threshold pair and overlap:
+- An empirical p-value of the optimal overlap which is derived from a
+  permutation-based null distribution.
+- An FDR estimation based on the derivations detailed in the paper linked above.
 
-#### Note
-- Make sure that the column names of the two datasets have the same naming scheme to allow proper pairing of the samples. For example, use systematic name for all (such as ENSG00000256223) or use common name (ZNF10).
-- Similarily make sure the row names are consistent for proper mateching of the gene sets.
+This crate offers both a library to incorporate DTO into other workflows, 
+and a command-line binary for standalone use.
 
-## Code Usage
-#### 1. Run DTO on authentic datasets
-```
-python thresholdSearch.py -d <response_csv> --DE_decreasing <True/False> -b <binding_csv> --Bin_decreasing <True/False> --sbatch_loc <output_dir>/authentic_model/ --genes_universe <gene_universe_file> [--geneNames_file <gene_name_file>] [--run_local]
-```
-Required arguments:
-- `-d <response_csv>` CSV file of transcriptional response levels of TF-perturbation. The response levels are based on differential expression or DE analysis on TF-perturbed expression profile vs. pre-perturbation profile. Those levels can be represented as absolute of log fold-changes (LFCs) or P-values.
-- `-b <binding_csv>` CSV file of TF binding strengths. The binding strengths can be represented as occupancy levels of the peaks (e.g. heights of ChIP peaks) or statistical significances (e.g. P-values).
-- `--DE_decreasing <True/False>` Use `True` if the response levels should be raneked in descending order. Use `False` if ranked in ascending order. For example: If using LFCs, set `True` as higher absolute LFC represents stronger response. If using P-values, set `False` as lower P-value represents stronger response.
-- `--Bin_decreasing <True/False>` Use `True` if the binding strengths should be ranked in descending order. Use `False` if ranked in ascending order. For example: If using occupancy levels, set `True` as higher occupancy level represents stronger TF binding. If using P-values, set `False` as lower P-value represents stronger TF binding.
-- `--sbatch_loc <output_dir>/authentic_model/` Directory for output data.
-- `--genes_universe <gene_universe_file>` Gene universe list file, which contains all possible genes to be considered as the universe for calculating overlap statistics.
+Note: Starting with version 2.0.0, the method was fully re-implemented in Rust. For
+the original implementation, which is the version used in the paper linked above,
+see version 1.0.0, implemented by Yiming Kang.
 
-Optional arguments: 
-- `--geneNames_file <gene_name_file>` CSV file of gene name conversion, if the systematic gene names in the data files are preferred to be converted into common gene names.
-- `--run_local` If no SLURM is available, set this flag to run DTO in serial fashion on your local machine.
+## Table of Contents
+- [Getting Started](#user-installation)
+    - [Using the cmd line](#cmdline-usage)
+        - [Output](#output)
+    - [Using the library](#library-usage)
+    - [Development](#developer-installation-and-usage)
+- [Algorithmic Details](#algorithmic-details)
+- [Troubleshooting](#troubleshooting)
+- [Acknowledgements](#acknowledgements)
 
-#### 2. Run DTO on randomized datasets
-```
-python thresholdSearch.py --random True -d <response_csv> --DE_decreasing <True/False> -b <binding_csv> --Bin_decreasing <True/False> --sbatch_loc <output_dir>/random_models/ --genes_universe <gene_universe_file> [--geneNames_file <gene_name_file>] [--run_local]
-```
-Required arguments:
-- Same as above, except:
-- `--random True` Use `True` for running DTO on randomized input data 1000 times. The DTO results on randomized data is used to create an empirical null distribution.
-- `--sbatch_loc <output_dir>/random_models/` Make a new output directory for null model output.
+## Getting started
 
-#### 3. Summarize DTO results
-```
-python summarizeFinalResults.py -i <output_dir> [--run local]
+Binaries for Linux, MacOS and Windows are provided in in the `release` tab. There are
+two flavors of releases for each OS:
+
+1. **The standard release**: this is suitable for almost every user
+
+2. **An MPI enabled version**: only if you want to parallelize across multiple machines.
+   **NOTE**: For this version, MPI must be installed on the host system.
+
+
+### Using the cmd line
+
+With the correct binary, you can print the help message like so:
+
+```bash
+dual_threshold_optimization --help
 ```
 
-Required arguments:
-- `-i <output_dir>` Directory of DTO results including both authentic model and randomized models.
+```bash
+Dual Threshold Optimization CLI
 
-Optional arguments:
-- `--run_local` If no SLURM is available, set this flag to run DTO in serial fashion on your local machine.
+Usage: dual_threshold_optimization [OPTIONS] --ranked-list1 <FILE> --ranked-list2 <FILE>
 
-## Example Usage
-A small yeast dataset of TF perturbation responses (ZEV 15-min) and TF binding locations (transposon calling cards) is provided in `Examples/`. The response values are the absolute log fold-changes and the binding strength values are -log10(P-value). We set `--DE_decreasing` and `--Bin_decreasing` to `True`. It means that the genes should be ranked in decreasing order of their responsive levels (the higher rank, the stronger response), and likewise for the binding data.
+Options:
+  -1, --ranked-list1 <FILE>
+          Path to the first ranked feature list (CSV format).
+          
+          This should have two columns: "feature" and "rank". There should be **NO HEADER**.
+          
+          Rank is expected to be an integer. It is recommended that ties are handed with the `min` or `max` method.
 
-First, run the authentic model.
+  -2, --ranked-list2 <FILE>
+          Path to the second ranked feature list (CSV format)
+          
+          This should have two columns: "feature" and "rank". There should be **NO HEADER**.
+          
+          Rank is expected to be an integer. It is recommended that ties are handed with the `min` or `max` method.
+
+  -b, --background <FILE>
+          Path to the background feature list (one feature per line, optional)
+
+  -p, --permutations <PERMUTATIONS>
+          Number of permutations to perform
+          
+          [default: 1000]
+
+  -t, --threads <THREADS>
+          Number of threads to use per task. For single-node parallelization, this will be the number of threads available on the machine.
+          
+          For multi-node parallelization, this will be the number of threads per task.
+          
+          Example: If you submit via Slurm with `-ntasks 4 --cpus-per-task 10`, then this value should be set to 10. This configuration will run 40 permutations in parallel.
+          
+          [default: 1]
+
+  -m, --multi-node
+          Enable multi-node mode using MPI. This requires that the program has been built with the `mpi` feature enabled
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+
 ```
-python thresholdSearch.py -d ../Examples/ZEV15_response_data.csv --DE_decreasing True -b ../Examples/CallingCards_binding_data.csv --Bin_decreasing True --sbatch_loc ../Output/authentic_model/ --genes_universe ../Examples/CallingCards_ZEV15_gene_universe.txt --geneNames_file ../Examples/Yeast_gene_name_lookup.csv
+
+You can run this with the following minimal test data:
+<!-- TODO: update the links when this goes to the main branch -->
+- input list examples: [list1](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/ranklist1.csv), [list2](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/ranklist2.csv)
+- background example: [background](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/background.txt)
+
+like this
+
+```bash
+# download list1
+wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist1.csv
+# download list2
+wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist2.csv
+
+# run the binary
+dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
 ```
 
-Second, run the randomization trials.
-```
-python thresholdSearch.py --random True -d ../Examples/ZEV15_response_data.csv --DE_decreasing True -b ../Examples/CallingCards_binding_data.csv --Bin_decreasing True --sbatch_loc ../Output/random_models/ --genes_universe ../Examples/CallingCards_ZEV15_gene_universe.txt --geneNames_file ../Examples/Yeast_gene_name_lookup.csv
+#### Output
+
+The output from the cmd line is a json to stdout. To redirect this to a file, you 
+would do the following:
+
+```bash
+dual_threshold_optimization -1 list1.csv -2 $list2.csv -p 1000 -t 24 > output.json
 ```
 
-Lastly, summarize DTO results from the above output.
+This is what the output will look like:
+
+```json
+{
+    "empirical_pvalue": 0.0,
+    "fdr": 0.3481243441762854,
+    "population_size": 14295,
+    "rank1": 1016,
+    "rank2": 896,
+    "set1_len": 1016,
+    "set2_len": 896,
+    "unpermuted_intersection_size": 127,
+    "unpermuted_pvalue": 1.5719992077514072e-14
+}
 ```
-python summarizeFinalResults.py -i ../Output/
+
+Where the fields are the following:
+
+- **empirical_pvalue**: The quantile of the unpermuted minimum p-value in relation to
+  the series of permuted minimal p-values
+- **fdr**: The false discovery rate where the sensitivity is set to 0.8. See the
+  [DTO paper](https://doi.org/10.1101/gr.259655.119) for more details
+- **population_size**: The size of the background. If no background is explicity
+  provided, this is the length of the input lists (when no background is provided, 
+  the lists must contain the same set of features)
+- **rank1**: The optimal rank for the unpermuted minimum p-value for list 1
+- **rank2**: The optimal rank for the unpermuted minimum p-value for list 2
+- **set1_len**: The number of features with rank less than or equal to **rank1** in
+  list1
+- **set2_len**: The number of features with rank less than or equal to **rank2** in
+  list2
+- **unpermuted_intersection_size**: The number of genes in the intersection of
+  list1 and list2 with rank less than or equal to their respective optimal ranks
+- **unpermuted p-value** the optimal p-value of the unpermuted lists. For analysis
+  purposes, the empirical p-value should be used.
+
+### Using the library
+
+To use the library, you can `cargo add dual_threshold_optimization` in your rust
+project. See the crates.io documentation for more information about what is provided
+in each of the submodules.
+
+### Developer installation and usage
+
+It is assumed that you have the
+[rust toolchain](https://www.rust-lang.org/tools/install) already installed.
+
+1. git pull this repository
+2. `cd` into the repo
+
+For any of the commands below, you can add `--features mpi` to include the MPI
+feature. But, remember that this requires that MPI exist in your environment
+(e.g. [openMPI](https://www.open-mpi.org/))
+
+At this point, you can run the tests with:
+
+```bash
+cargo test
 ```
 
-## Output Files
-After completing the above three steps, the DTO results are stored in a directory called `<output_dir>/summary/`. The following output files are of interest:
-- `summary.txt`: Basic information of the DTO run: the numbers of TFs that have acceptable convergence, the corresponding TF-target edges and unique target genes. 
-- `edges.csv`: An adjacency list of the high-confidence edges. Each row is a tuple (TF, gene) representing the edge.
-- `acceptableTFs.csv`: Detailed information of the DTO run for the TFs that have acceptable convergence. Each row shows the DTO results for each TF, including the Venn diagram of the TFs' target sets, FDR lower bound estimate at sensitivity of 80%, overlap statistics such as hypergeometric P-value, and a list of bound and responsive target genes.
-- `TFcutoffs.csv`: Hypergeometric P-value cutoff for each TF, which is the 1st percentile of the distribution of the empirical hypergeometric P-values obtained from 1000 randomization trials. 
+or
 
-In addition, you may reference this file if you are interested in all TFs being analyzed:
-- `<output_dir>/authentic_model.csv` Same format as `acceptableTFs.csv.`
+```bash
+cargo test
+```
 
-## References
-- Kang, Y., Patel, N., Shively, C., et al. (2020). Dual threshold optimization and network inference reveal convergent evidence from TF binding locations and TF perturbation responses. Genome Research. doi: 10.1101/gr.259655.119.
+you can run the binary with
+
+```bash
+cargo run -- --help
+```
+
+and you can guild with
+
+```bash
+cargo build
+```
+
+Note that there is a build profile for profiling which will build a release version
+with the debug flags on:
+
+```bash
+cargo build --profile release-debug
+```
+
+To build the binaries for each OS, use `cross`
+
+```bash
+cargo add cross
+```
+
+Then build like this
+
+```bash
+# linux
+cross build --release --target x86_64-unknown-linux-gnu
+
+# windows
+cross build --release --target x86_64-pc-windows-gnu
+
+# MacOS -- intel
+cross build --release --target x86_64-apple-darwin
+
+# MacOS -- apple silicon
+cross build --release --target aarch64-apple-darwin
+```
+
+### Test data
+
+Test data can be found in the `test_data` subdirectory
+
+### Profiling
+
+I recommend profiling with [hyperfine](https://github.com/sharkdp/hyperfine)
+for runtime and [heaptrack](https://github.com/KDE/heaptrack) for memory.
+The results of profiling on the test data are in the `/profiling` subdirectory
+
+## Algorithmic details
+
+The following provides details on the DTO algorithm, step by step.
+
+1. Initialize two ranked feature lists
+
+    Begin with two ranked lists of features, e.g. genes, where each feature has
+    an id, e.g. a unique identifier for the gene, and a rank. The rank must be an
+    integer and is expected to have ties handled with a method such as "min" or "max"
+    where ties all are assigned the same rank.
+    
+1. Create a series of thresholds for each list based on the ranks
+
+    For each list, generate a series of thresholds T1, T2, ... . These thresholds are
+    used to generate sets of features from each list to compare the overlap.
+    The thresholds are calculated by the recurrence relation
+
+    $$
+    T_1 = 1 \\
+    Tn = Floor(T_{n-1} * 1.01 + 1)
+    $$
+    
+    The stopping condition is when the threshold meets or exceeds the largest rank.
+    The final threshold is always set to the max rank. This series provides finer
+    spacing at higher ranks, allowing more granular selection among top-ranked genes.
+
+1. Conduct a brute force search of the threshold pairs to find an optimal overlap
+
+    For each possible pair of thresholds (one from each list’s threshold series),
+    select the genes from each list that rank above the respective threshold. Calculate
+    the hypergeometric p-value by intersecting the feature sets
+
+1. Select optimal threshold pair
+
+    Track the threshold pair that produces the minimum P-value across all tested pairs.
+    This threshold combination is considered optimal for identifying significant
+    overlap between the two lists.
+
+    **CAVEAT**: We have discovered that the minimal p-value may not be unique. There
+    are possibly multiple sets that yield the same p-value, including the minimal
+    p-value. When this occurs on the minimal p-value, the threshold pair that yields
+    the largest overlap is selected. When there are multiple threshold pairs that
+    have the same p-value and the same intersect size, the first in the set is
+    chosen arbitrarily.
+
+1. Use permutations to generate a null distribution for the minimal p-value
+
+    To assess the statistical significance of the identified overlap, run DTO multiple
+    times (e.g., 1000 runs) on randomized versions of the ranked lists. This creates a
+    null distribution of the minimal p-value. This null distribution allows for
+    evaluating the observed minimum P-value relative to random chance.
+
+1. Calculate false discovery rate (FDR)
+
+    In the [DTO paper](https://doi.org/10.1101/gr.259655.119), an FDR is derived. This
+    FDR is estimated for the optimal threshold pair.
+
+
+## Troubleshooting
+
+If you are using the MPI binary, then you must have MPI in your environment. If you
+do have MPI installed, but you get an error similar to the one below:
+
+```bash
+./dual_threshold_optimization: error while loading shared libraries: libmpi.so.40: cannot open shared object file: No such file or directory
+```
+
+Then you need to find where the `libmpi.so.40` file lives and add
+it to your `LD_LIBRARY_PATH` manually. E.g.
+
+```bash
+export LD_LIBRARY_PATH=/ref/mblab/software/spack-0.22.2/opt/spack/linux-rocky9-x86_64/gcc-11.4.1/openmpi-5.0.3-vjscapwoywmullqs3lj2mmdf7vyge4rk/lib:$LD_LIBRARY_PATH
+```
+
+## Acknowledgements
+
+DTO was originally implemented by [Yiming Kang](https://github.com/yiming-kang). See version 1.0.0 for that
+implementation. That work was described in
+[Dual threshold optimization and network inference reveal convergent evidence from TF binding locations and TF perturbation responses](https://doi.org/10.1101/gr.259655.119)

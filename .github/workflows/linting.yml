@@ -1,0 +1,39 @@
+name: Rust Linting and Formatting
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from the repository
+      - name: Check out code
+        uses: actions/checkout@v3
+      
+      # Step 2: Install OpenMPI
+      - name: install openmpi
+        run: sudo apt-get update && sudo apt-get install -y libopenmpi-dev openmpi-bin
+
+      # Step 3: Install Rust using rustup
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          override: true
+
+      # Step 4: Run cargo fmt to check formatting
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+
+      # Step 5: Run cargo clippy to check for lints
+      - name: Run cargo clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings

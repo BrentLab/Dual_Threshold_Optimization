@@ -1,0 +1,18 @@
+To conduct the profiling, first build the project with the release-debug
+
+```bash
+cargo build --profile release-debug
+```
+
+Then you can use `hyperfine` for time information, and `heaptrack` for memory profiling
+
+```bash
+#!/bin/bash
+
+# Hyperfine
+hyperfine --export-json hyperfine_results.json './target/release-debug/dual_threshold_optimization -1 tmp/ranklist1.csv -2 tmp/ranklist2.csv -p 1000 --threads 28'
+
+# Heaptrack
+heaptrack ./target/release-debug/dual_threshold_optimization -1 tmp/ranklist1.csv -2 tmp/ranklist2.csv -p 1000 --threads 28
+
+```
