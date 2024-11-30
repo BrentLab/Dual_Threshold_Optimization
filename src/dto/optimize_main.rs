@@ -1,7 +1,7 @@
 use crate::collections::RankedFeatureList;
 use crate::dto::{process_threshold_pairs, OptimizationResult};
 
-pub fn optimize<'a>(
+pub fn optimize(
     ranked_feature_list1: &RankedFeatureList,
     ranked_feature_list2: &RankedFeatureList,
     permute: bool,

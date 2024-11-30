@@ -35,7 +35,7 @@ use std::collections::HashSet;
 ///
 /// assert_eq!(intersection_size, 2);
 /// ```
-pub fn intersect_genes<'a, T1, T2>(genes1: T1, genes2: T2) -> usize
+pub fn intersect_genes<T1, T2>(genes1: T1, genes2: T2) -> usize
 where
     T1: AsRef<[Feature]>,
     T2: AsRef<[Feature]>,

@@ -145,22 +145,22 @@ This is what the output will look like:
 Where the fields are the following:
 
 - **empirical_pvalue**: The quantile of the unpermuted minimum p-value in relation to
-the series of permuted minimal p-values
+  the series of permuted minimal p-values
 - **fdr**: The false discovery rate where the sensitivity is set to 0.8. See the
-[DTO paper](https://doi.org/10.1101/gr.259655.119) for more details
+  [DTO paper](https://doi.org/10.1101/gr.259655.119) for more details
 - **population_size**: The size of the background. If no background is explicity
-provided, this is the length of the input lists (when no background is provided, 
-the lists must contain the same set of features)
+  provided, this is the length of the input lists (when no background is provided, 
+  the lists must contain the same set of features)
 - **rank1**: The optimal rank for the unpermuted minimum p-value for list 1
 - **rank2**: The optimal rank for the unpermuted minimum p-value for list 2
 - **set1_len**: The number of features with rank less than or equal to **rank1** in
-list1
+  list1
 - **set2_len**: The number of features with rank less than or equal to **rank2** in
-list2
+  list2
 - **unpermuted_intersection_size**: The number of genes in the intersection of
-list1 and list2 with rank less than or equal to their respective optimal ranks
+  list1 and list2 with rank less than or equal to their respective optimal ranks
 - **unpermuted p-value** the optimal p-value of the unpermuted lists. For analysis
-purposes, the empirical p-value should be used.
+  purposes, the empirical p-value should be used.
 
 ### Using the library
 

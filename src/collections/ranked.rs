@@ -331,6 +331,31 @@ impl RankedFeatureList {
         self.genes.len()
     }
 
+    /// Check if the `RankedFeatureList` is empty.
+    /// 
+    /// # Returns
+    /// 
+    /// `true` if the list is empty, `false` otherwise.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use dual_threshold_optimization::collections::{Feature, FeatureList, RankedFeatureList};
+    /// 
+    /// let genes = FeatureList::from(vec![Feature::from("gene1"), Feature::from("gene2")]);
+    /// let ranks = vec![1, 2];
+    /// let ranked_list = RankedFeatureList::from(genes, ranks).unwrap();
+    /// 
+    /// assert!(!ranked_list.is_empty());
+    /// 
+    /// let empty_list = RankedFeatureList::new();
+    /// 
+    /// assert!(empty_list.is_empty());
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        self.genes.is_empty()
+    }
+
     pub fn generate_thresholds(&mut self) {
         let mut thresholds = Vec::new();
         let mut current = 1;
