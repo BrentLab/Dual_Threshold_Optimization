@@ -105,15 +105,11 @@ fn main() {
         ranked_feature_list1.thresholds().len() * ranked_feature_list2.thresholds().len()
     );
 
-    let background = if let Some(background_file) = cli.background {
-        Some(read_feature_list_from_file(
+    let background = cli.background.map(|background_file| read_feature_list_from_file(
             background_file
                 .to_str()
                 .expect("Invalid file path for background"),
-        ))
-    } else {
-        None
-    };
+        ));
 
     let population_size = compute_population_size(
         &ranked_feature_list1,
