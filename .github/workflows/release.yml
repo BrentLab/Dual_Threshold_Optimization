@@ -4,13 +4,6 @@ on:
   push:
     branches:
       - main
-      - rust_implementation
-  workflow_run:
-    workflows:
-      - Rust Tests
-      - Rust Linting and Formatting
-    types:
-      - completed
   
 env:
   GH_TOKEN: ${{ github.token }}
@@ -97,7 +90,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: "v${{ env.version }}"
-          release_name: "Release v${{ env.version }}"
+          release_name: "${{ env.version }}"
           draft: false
           prerelease: false
 
