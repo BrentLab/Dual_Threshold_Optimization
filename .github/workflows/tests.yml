@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - rust_implementation
   pull_request:
     branches:
       - main

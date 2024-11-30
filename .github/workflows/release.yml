@@ -5,6 +5,12 @@ on:
     branches:
       - main
       - rust_implementation
+  workflow_run:
+    workflows:
+      - Rust Tests
+      - Rust Linting and Formatting
+    types:
+      - completed
 
 jobs:
   build:
@@ -57,7 +63,7 @@ jobs:
       # Step 5: Build the binary with features
       - name: Build
         run: |
-          cargo build --all --release ${{ matrix.feature != '' && '--features ' || '' }}${{ matrix.feature }}
+          cargo build --release ${{ matrix.feature != '' && '--features ' || '' }}${{ matrix.feature }}
           && mv target/release/dual_threshold_optimization target/release/dual_threshold_optimization-${{ matrix.os }}-${{ matrix.feature == '' && 'default' || matrix.feature }}${{ runner.os == 'Windows' && '.exe' || '' }}
 
       # Step 6: Upload artifact
