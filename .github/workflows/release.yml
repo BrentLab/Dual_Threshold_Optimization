@@ -1,0 +1,112 @@
+name: Rust Release
+
+on:
+  push:
+    branches:
+      - main
+  
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        feature: ["default", mpi]
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Step 2: Install OpenMPI (for mpi feature only)
+      - name: Install OpenMPI
+        if: matrix.feature == 'mpi' && runner.os == 'Linux'
+        run: |
+          sudo apt-get update \
+          && sudo apt-get install -y libopenmpi-dev openmpi-bin
+
+      # Step 3: Cache Rust dependencies
+      - name: Cache Rust dependencies
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.OS }}-${{ matrix.feature }}-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-${{ matrix.feature }}-build-
+
+      # Step 4: Install Rust toolchain
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: beta
+          default: true
+          override: true
+          target: ${{ matrix.os == 'macos-latest' && 'x86_64-apple-darwin' || matrix.os == 'windows-latest' && 'x86_64-pc-windows-msvc' || '' }}
+
+      # Step 5: Build the binary with features
+      - name: Build
+        shell: bash
+        run: |
+          if [ "${{ matrix.feature }}" == "mpi" ] && [ "${{ matrix.os }}" != "ubuntu-latest" ]; then
+            echo "Skipping mpi build for non-Linux systems"
+            exit 0
+          fi
+          cargo build --release ${{ matrix.feature == 'mpi' && '--features mpi' || '' }}
+          mv target/release/dual_threshold_optimization \
+            target/release/dual_threshold_optimization-${{ matrix.os }}-${{ matrix.feature }}${{ runner.os == 'Windows' && '.exe' || '' }}
+
+      # Step 6: Upload artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: dual_threshold_optimization-${{ matrix.os }}-${{ matrix.feature }}
+          path: target/release/dual_threshold_optimization-${{ matrix.os }}-${{ matrix.feature }}${{ runner.os == 'Windows' && '.exe' || '' }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build]
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Step 2: Extract version from Cargo.toml
+      - name: Get version from Cargo.toml
+        id: version
+        run: |
+          VERSION=$(grep '^version =' Cargo.toml | head -n 1 | cut -d '"' -f 2)
+          echo "VERSION=$VERSION"
+          echo "version=$VERSION" >> $GITHUB_ENV
+
+      # Step 3: Create a release
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v${{ env.version }}"
+          release_name: "${{ env.version }}"
+          draft: false
+          prerelease: false
+
+      # Step 4: Download artifacts from build jobs
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: binaries
+
+      # Step 5: Upload binaries to the release
+      - name: Upload binaries to release
+        run: |
+          for file in binaries/*/*; do
+            if [ -f "$file" ]; then
+              echo "Uploading $file"
+              gh release upload "v${{ env.version }}" "$file" --clobber
+            fi
+          done
+
