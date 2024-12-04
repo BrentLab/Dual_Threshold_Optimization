@@ -1,6 +1,7 @@
 # Dual Threshold Optimization
 [![Rust Tests](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/tests.yml/badge.svg)](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/tests.yml)
 [![Rust Linting and Formatting](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/linting.yml/badge.svg)](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/linting.yml)
+![Crates.io Version](https://img.shields.io/crates/v/dual_threshold_optimization)
 
 This library provides a comprehensive toolkit for performing
 [Dual Threshold Optimization](https://doi.org/10.1101/gr.259655.119) (DTO)
@@ -52,6 +53,14 @@ toolchain and compile a binary. Alternatively, open an Issue and we will help.
 
 ### Installation
 
+If you have `cargo`, the Rust package manager, installed, you can do the following to
+install `dual_threshold_optimization` in your `$PATH`:
+
+```bash
+cargo install dual_threshold_optimization
+```
+
+Alternatively, you can download binaries from the [github release](https://github.com/BrentLab/Dual_Threshold_Optimization/releases).
 If you are on a Mac, for example, and you do not need MPI (most users), then you would
 download the binary called `dual_threshold_optimization-macos-latest-default` from the
 releases tab. There is also a windows executable, and both a default (non-mpi) and mpi
@@ -77,10 +86,11 @@ to rename the executable to simply `dual_threshold_optimization`.
 
 ### Using the cmd line
 
-With the correct binary, you can print the help message like so:
+With the correct binary, you can print the help message like so (omit the `./` if 
+`dual_threshold_optimization` is in your `$PATH`):
 
 ```bash
-dual_threshold_optimization --help
+./dual_threshold_optimization --help
 ```
 
 ```bash
