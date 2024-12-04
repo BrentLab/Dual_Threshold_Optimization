@@ -273,10 +273,7 @@ The following provides details on the DTO algorithm, step by step.
     used to generate sets of features from each list to compare the overlap.
     The thresholds are calculated by the recurrence relation
 
-    $$
-    T_1 = 1 \\
-    Tn = Floor(T_{n-1} * 1.01 + 1)
-    $$
+    $$ T_1 = 1 \\ Tn = Floor(T_{n-1} * 1.01 + 1) $$
     
     The stopping condition is when the threshold meets or exceeds the largest rank.
     The final threshold is always set to the max rank. This series provides finer
