@@ -26,9 +26,9 @@ see version 1.0.0, implemented by Yiming Kang, in the releases.
 
 ## Table of Contents
 - [Getting Started](#user-installation)
-    - [Using the cmd line](#cmdline-usage)
+    - [Using the cmd line](#using-the-cmd-line)
         - [Output](#output)
-    - [Using the library](#library-usage)
+    - [Using the library](#using-the-library)
     - [Development](#developer-installation-and-usage)
 - [Algorithmic Details](#algorithmic-details)
 - [Troubleshooting](#troubleshooting)
