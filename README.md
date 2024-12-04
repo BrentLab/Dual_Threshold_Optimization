@@ -1,7 +1,9 @@
 # Dual Threshold Optimization
 [![Rust Tests](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/tests.yml/badge.svg)](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/tests.yml)
 [![Rust Linting and Formatting](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/linting.yml/badge.svg)](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/linting.yml)
-[![Crates.io Version](https://img.shields.io/crates/v/dual_threshold_optimization)](https://crates.io/crates/dual_threshold_optimization)
+[![Crates.io Version](https://img.shields.io/crates/v/dual_threshold_optimization?cacheBust=1)](https://crates.io/crates/dual_threshold_optimization)
+[![Documentation](https://docs.rs/dual_threshold_optimization/badge.svg)](https://docs.rs/dual_threshold_optimization)
+
 
 This library provides a comprehensive toolkit for performing
 [Dual Threshold Optimization](https://doi.org/10.1101/gr.259655.119) (DTO)
@@ -53,14 +55,6 @@ toolchain and compile a binary. Alternatively, open an Issue and we will help.
 
 ### Installation
 
-If you have `cargo`, the Rust package manager, installed, you can do the following to
-install `dual_threshold_optimization` in your `$PATH`:
-
-```bash
-cargo install dual_threshold_optimization
-```
-
-Alternatively, you can download binaries from the [github release](https://github.com/BrentLab/Dual_Threshold_Optimization/releases).
 If you are on a Mac, for example, and you do not need MPI (most users), then you would
 download the binary called `dual_threshold_optimization-macos-latest-default` from the
 releases tab. There is also a windows executable, and both a default (non-mpi) and mpi
@@ -86,11 +80,10 @@ to rename the executable to simply `dual_threshold_optimization`.
 
 ### Using the cmd line
 
-With the correct binary, you can print the help message like so (omit the `./` if 
-`dual_threshold_optimization` is in your `$PATH`):
+With the correct binary, you can print the help message like so:
 
 ```bash
-./dual_threshold_optimization --help
+dual_threshold_optimization --help
 ```
 
 ```bash
@@ -141,22 +134,21 @@ Options:
 
 ```
 
-You can run this with the following minimal test data:  
-
-- input list examples: [list1](https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/ranklist1.csv), [list2](https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/ranklist2.csv)
-- background example: [background](https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/background.txt)
+You can run this with the following minimal test data:
+<!-- TODO: update the links when this goes to the main branch -->
+- input list examples: [list1](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/ranklist1.csv), [list2](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/ranklist2.csv)
+- background example: [background](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/background.txt)
 
 like this
 
 ```bash
 # download list1
-wget https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/ranklist1.csv
+wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist1.csv
 # download list2
-wget https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/ranklist2.csv
+wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist2.csv
 
-# run the binary. Note that the background is optional. If not provided, then ranklist1 and ranklist2 must have
-# the same set of features
-./dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
+# run the binary
+dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
 ```
 This will output some run information to stderr, and a json to stdout. The json in the
 stdout is the output of the program. This is important because it means that you can
@@ -213,7 +205,11 @@ Where the fields are the following:
 
 To use the library in your own Rust program, you can
 `cargo add dual_threshold_optimization` in your rust project. See the crates.io
-documentation for more information about what is provided in each of the submodules.
+documentation for more information about what is provided in each of the submodules.  
+
+crates.io provides
+[documentation](https://docs.rs/dual_threshold_optimization/latest/dual_threshold_optimization/) 
+of the various structs, types, etc provided by `dual_threshold_optimization`.
 
 ### Developer installation and usage
 
@@ -289,24 +285,27 @@ The following provides details on the DTO algorithm, step by step.
     used to generate sets of features from each list to compare the overlap.
     The thresholds are calculated by the recurrence relation
 
-    $$ T_1 = 1 \\ Tn = Floor(T_{n-1} * 1.01 + 1) $$
+    <p align="center">
+      T<sub>1</sub> = 1<br/>
+      T<sub>n</sub> = ⌊ T<sub>n-1</sub> * 1.01 + 1 ⌋
+    </p>
     
     The stopping condition is when the threshold meets or exceeds the largest rank.
     The final threshold is always set to the max rank. This series provides finer
     spacing at higher ranks, allowing more granular selection among top-ranked genes.  
 
     The effect of this equation is that for the first 100 ranks, the thresholds
-    increment at the same rate as the ranks, so we have $1, 2, 3, \dots$ . At $100$, the 
-    resolution decreases by 2, eg $100, 102, 104, \dots$ . For every additional 100
+    increment at the same rate as the ranks, so we have 1, 2, 3, ... . At 100, the 
+    resolution decreases by 2, eg 100, 102, 104, ... . For every additional 100
     ranks after this, the resolution decreases by 1, so for instance:
-    $200, 203, 206, \dots, 402, 407, \dots, 1705, 1723, 1741$
+    200, 203, 206, ..., 402, 407, ..., 1705, 1723, 1741
 
 1. Conduct a brute force search of the threshold pairs to find an optimal overlap
 
     For each possible pair of thresholds, select the genes from each list with rank
     less than or equal to the respective threshold. Calculate the hypergeometric
     p-value by intersecting the feature sets. This is the core of the algorithm with
-    a complexity of $O(n^2)$ where $n$ is the length of the threshold lists.
+    a complexity of O(n^2) where n is the length of the threshold lists.
 
 1. Report the optimal threshold pair
 

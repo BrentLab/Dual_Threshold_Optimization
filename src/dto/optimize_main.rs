@@ -1,6 +1,55 @@
 use crate::collections::RankedFeatureList;
 use crate::dto::{process_threshold_pairs, OptimizationResult};
 
+/// This is the main function of the dto module. It takes two ranked feature lists
+/// and finds the optimal thresholds which produce the smallest hypergeometric p-value
+/// for the intersection of the two subsets formed by taking the features with rank
+/// less than or equal to the thresholds.
+///
+/// # Arguments
+/// - `ranked_feature_list1`: The first ranked feature list.
+/// - `ranked_feature_list2`: The second ranked feature list.
+/// - `permute`: Whether to permute the ranks of the second list.
+/// - `population_size`: The size of the population for permutation testing.
+/// - `debug`: Whether to return all results or just the best result.
+///
+/// # Returns
+/// An `OptimizationResult` enum containing either the best result or all results.
+///
+/// # Example
+///
+/// ```
+/// use dual_threshold_optimization::collections::{Feature, FeatureList, RankedFeatureList};
+///
+/// use dual_threshold_optimization::dto::{optimize, OptimizationResult};
+///
+/// // RankedFeatureList 1
+/// let genes1 = FeatureList::from(vec![
+///   Feature::from("gene1"),
+///   Feature::from("gene2"),
+///   Feature::from("gene3"),
+/// ]);
+///
+/// let ranks1 = vec![1, 2, 3];
+/// let ranked_feature_list1 = RankedFeatureList::from(genes1, ranks1).unwrap();
+///
+/// // RankedFeatureList 2
+/// let genes2 = FeatureList::from(vec![
+///   Feature::from("gene1"),
+///   Feature::from("gene2"),
+///   Feature::from("gene4"),
+/// ]);
+///
+///
+/// let ranks2 = vec![1, 2, 3];
+///
+/// let ranked_feature_list2 = RankedFeatureList::from(genes2, ranks2).unwrap();
+/// // note that the background would have had to be provided in this case, since the
+/// // two ranked feature lists have different features.
+/// let result = optimize(&ranked_feature_list1, &ranked_feature_list2, true, 4, false);
+///
+/// // Ensure the optimization returned a valid best result
+/// assert!(matches!(result, OptimizationResult::Best(_)));
 pub fn optimize(
     ranked_feature_list1: &RankedFeatureList,
     ranked_feature_list2: &RankedFeatureList,
