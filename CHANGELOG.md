@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.0.1
+
+This only addresses a build error in the crates.io. Previously, I had tried to include
+a header to render LaTeX. But, that proved error prone. It is removed in favor of html
+in the README. I added a line in the Cargo.toml that should build the docs on crates.io
+with the --feature mpi, so that all functions, including the mpi functions, have 
+documentation generated. Finally, I added documentation to `optimize()`.  
+
+No code changes were made from 2.0.0.
+
 ## 2.0.0
 
 This is a complete re-write in Rust. In addition to changing the language, the

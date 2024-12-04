@@ -9,10 +9,9 @@ to determine the rank threshold for each list that minimizes the hypergeometric
 p-value of the overlap of features. It then calculates a permutation based 
 empirical p-value and an FDR. Details can be found [in this paper](https://doi.org/10.1101/gr.259655.119)
 """
-version = "2.0.0"
+version = "2.0.1"
 edition = "2021"
 readme = "README.md"
-repository = "https://github.com/BrentLab/Dual_Threshold_Optimization"
 license = "GPL-3.0-or-later"
 
 exclude = [
@@ -42,8 +41,9 @@ crate-type = ["rlib"]
 [features]
 mpi = ["dep:mpi"]
 
+# enable mpi features to be always documented
 [package.metadata.docs.rs]
-rustdoc-args = [ "--html-in-header", "path-to-your-header-file.html" ]
+features = ["mpi"]
 
 [[bin]]
 name = "dual_threshold_optimization"
