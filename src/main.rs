@@ -99,7 +99,7 @@ fn main() {
             .expect("Invalid file path for input2"),
     );
 
-    println!(
+    eprintln!(
         "The product of the lengths of the threshold lists \
         (this describes the asymptotic runtime of a single job): {}",
         ranked_feature_list1.thresholds().len() * ranked_feature_list2.thresholds().len()
@@ -161,7 +161,6 @@ fn main() {
         threads,
     );
 
-    println!("Results: {:#?}", results.len());
     let final_result = empirical_pvalue(results);
     println!("{}", serde_json::to_string_pretty(&final_result).unwrap());
 }

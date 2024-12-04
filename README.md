@@ -26,9 +26,9 @@ see version 1.0.0, implemented by Yiming Kang, in the releases.
 
 ## Table of Contents
 - [Getting Started](#user-installation)
-    - [Using the cmd line](#cmdline-usage)
+    - [Using the cmd line](#using-the-cmd-line)
         - [Output](#output)
-    - [Using the library](#library-usage)
+    - [Using the library](#using-the-library)
     - [Development](#developer-installation-and-usage)
 - [Algorithmic Details](#algorithmic-details)
 - [Troubleshooting](#troubleshooting)
@@ -52,12 +52,12 @@ toolchain and compile a binary. Alternatively, open an Issue and we will help.
 
 ### Installation
 
-If you are on a Mac, for example, and you do not need MPI, then you would download the
-binary called `dual_threshold_optimization-macos-latest-default` from the releases
-tab. There is also a windows executable, and both a default (non-mpi) and mpi version
-for ubuntu (which will work on most linux OS).
+If you are on a Mac, for example, and you do not need MPI (most users), then you would
+download the binary called `dual_threshold_optimization-macos-latest-default` from the
+releases tab. There is also a windows executable, and both a default (non-mpi) and mpi
+version for ubuntu (which will work on most linux OS).
 
-You will need to make this executable by entering
+After downloading to your computer, you will need to make this executable by entering
 
 ```bash
 chmod +x dual_threshold_optimization-macos-latest-default
@@ -66,14 +66,13 @@ chmod +x dual_threshold_optimization-macos-latest-default
 in your terminal. For windows, if you are not using the terminal, consult the internet
 for the equivalent.
 
-You may also want to rename the executable to something more manageable, eg from the
-terminal
+You may also want to rename the executable to something more manageable, e.g.
 
 ```bash
 mv dual_threshold_optimization-macos-latest-default dual_threshold_optimization
 ```
 
-to rename it to simply `dual_threshold_optimization`.
+to rename the executable to simply `dual_threshold_optimization`.
 
 
 ### Using the cmd line
@@ -148,14 +147,14 @@ wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs
 # run the binary
 dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
 ```
-This will output some run information to stderr, and a json to stdout. This is
-important because it means that you can re-direct the stdout to a file
-(see below)
+This will output some run information to stderr, and a json to stdout. The json in the
+stdout is the output of the program. This is important because it means that you can
+re-direct the stdout to a file (see below) without saving the run metadata.
 
 #### Output
 
-The output from the cmd line is a json to stdout. To redirect this to a file, you 
-would do the following:
+The output is a json format string to stdout. To redirect this to a file, you would do
+the following:
 
 ```bash
 
@@ -201,42 +200,42 @@ Where the fields are the following:
 
 ### Using the library
 
-To use the library, you can `cargo add dual_threshold_optimization` in your rust
-project. See the crates.io documentation for more information about what is provided
-in each of the submodules.
+To use the library in your own Rust program, you can
+`cargo add dual_threshold_optimization` in your rust project. See the crates.io
+documentation for more information about what is provided in each of the submodules.
 
 ### Developer installation and usage
 
 It is assumed that you have the
 [rust toolchain](https://www.rust-lang.org/tools/install) already installed.
 
-1. git pull this repository
-2. `cd` into the repo
+1. git clone this repository
+2. `cd` into `Dual_Threshold_Optimization`
 
 For any of the commands below, you can add `--features mpi` to include the MPI
 feature. But, remember that this requires that MPI exist in your environment
 (e.g. [openMPI](https://www.open-mpi.org/))
 
-At this point, you can run the tests with:
+You can build an optimized binary with
+
+```bash
+cargo build --release
+```
+
+You can run the tests with:
 
 ```bash
 cargo test
 ```
 
-you can run the binary with
+and you can run the debug binary with
 
 ```bash
 cargo run -- --help
 ```
 
-and you can guild with
-
-```bash
-cargo build
-```
-
-Note that there is a build profile for time and memory performance profiling which will build
-a release version with the debug flags on:
+Note that there is a build profile for time and memory performance profiling which
+will build a release version with the debug flags on:
 
 ```bash
 cargo build --profile release-debug
@@ -250,11 +249,17 @@ Minimal test data can be found in the `test_data` subdirectory
 
 I recommend profiling with [hyperfine](https://github.com/sharkdp/hyperfine)
 for runtime and [heaptrack](https://github.com/KDE/heaptrack) for memory.
-The results of profiling on the test data are in the `/profiling` subdirectory
+The results of profiling on the test data are in the `/profiling` subdirectory. Use the
+`release-debug` profile to build an executable for performance profiling.
 
-### Pre-commit
+### Pre-commit and CI
 
-Pre-commit is set up to run cargo fmt and clippy when you commit changes
+Pre-commit is set up to run `cargo fmt` and `clippy` when you commit changes. There is
+also github actions CI set up to run the test suite, the linters (`fmt` and `clippy`), 
+and on pulls to `main`, to create a release. In order for the release workflow to
+succeed, the version in `Cargo.toml` must not be the same as the current state of
+`main`. The release CI will build the binaries and add them to the release. You are
+responsible for updating the release notes after the workflow completes.
 
 ## Algorithmic details
 
@@ -277,33 +282,43 @@ The following provides details on the DTO algorithm, step by step.
     
     The stopping condition is when the threshold meets or exceeds the largest rank.
     The final threshold is always set to the max rank. This series provides finer
-    spacing at higher ranks, allowing more granular selection among top-ranked genes.
+    spacing at higher ranks, allowing more granular selection among top-ranked genes.  
+
+    The effect of this equation is that for the first 100 ranks, the thresholds
+    increment at the same rate as the ranks, so we have $1, 2, 3, \dots$ . At $100$, the 
+    resolution decreases by 2, eg $100, 102, 104, \dots$ . For every additional 100
+    ranks after this, the resolution decreases by 1, so for instance:
+    $200, 203, 206, \dots, 402, 407, \dots, 1705, 1723, 1741$
 
 1. Conduct a brute force search of the threshold pairs to find an optimal overlap
 
-    For each possible pair of thresholds (one from each list’s threshold series),
-    select the genes from each list that rank above the respective threshold. Calculate
-    the hypergeometric p-value by intersecting the feature sets
+    For each possible pair of thresholds, select the genes from each list with rank
+    less than or equal to the respective threshold. Calculate the hypergeometric
+    p-value by intersecting the feature sets. This is the core of the algorithm with
+    a complexity of $O(n^2)$ where $n$ is the length of the threshold lists.
 
-1. Select optimal threshold pair
+1. Report the optimal threshold pair
 
-    Track the threshold pair that produces the minimum P-value across all tested pairs.
-    This threshold combination is considered optimal for identifying significant
-    overlap between the two lists.
+    Return the threshold pair that describes the respective rank of each list that
+    produces the feature sets that result in the minimum hypergeometric p-value
+    (one-sided, upper only) across all tested threshold pairs. This threshold pair is
+    considered optimal for identifying significant overlap between two ranked feature
+    lists.
 
-    **CAVEAT**: We have discovered that the minimal p-value may not be unique. There
-    are possibly multiple sets that yield the same p-value, including the minimal
-    p-value. When this occurs on the minimal p-value, the threshold pair that yields
-    the largest overlap is selected. When there are multiple threshold pairs that
-    have the same p-value and the same intersect size, the first in the set is
-    chosen arbitrarily.
+    **CAVEAT**: Though infrequent, due to the interplay between
+    parameters of the hypergeometric distribution, it is possible that multiple sets
+    yield the same p-value, including the minimal p-value. When this occurs on the
+    minimal p-value, the threshold pair that yields the largest overlap is selected 
+    as optimal. When there are multiple threshold pairs that have the same p-value and
+    the same intersect size, the first in the set is chosen arbitrarily.
 
 1. Use permutations to generate a null distribution for the minimal p-value
 
-    To assess the statistical significance of the identified overlap, run DTO multiple
-    times (e.g., 1000 runs) on randomized versions of the ranked lists. This creates a
-    null distribution of the minimal p-value. This null distribution allows for
-    evaluating the observed minimum P-value relative to random chance.
+    To assess the statistical significance of the identified threshold pair, run steps
+    3 and 4 multiple times (e.g., 1000 times) on randomized versions of the
+    ranked lists (features assigned to ranks arbitrarily). This creates a null
+    distribution of the minimal p-value and allows calculation of an empirical p-value
+    of observing the previously identified optimal threshold pair by chance.
 
 1. Calculate false discovery rate (FDR)
 
