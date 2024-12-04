@@ -22,7 +22,7 @@ and a command-line binary for standalone use.
 
 Note: Starting with version 2.0.0, the method was fully re-implemented in Rust. For
 the original implementation, which is the version used in the paper linked above,
-see version 1.0.0, implemented by Yiming Kang.
+see version 1.0.0, implemented by Yiming Kang, in the releases.
 
 ## Table of Contents
 - [Getting Started](#user-installation)
