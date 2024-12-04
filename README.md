@@ -1,6 +1,9 @@
 # Dual Threshold Optimization
 [![Rust Tests](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/tests.yml/badge.svg)](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/tests.yml)
 [![Rust Linting and Formatting](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/linting.yml/badge.svg)](https://github.com/BrentLab/Dual_Threshold_Optimization/actions/workflows/linting.yml)
+[![Crates.io Version](https://img.shields.io/crates/v/dual_threshold_optimization)](https://crates.io/crates/dual_threshold_optimization)
+[![Documentation](https://docs.rs/dual_threshold_optimization/badge.svg)](https://docs.rs/dual_threshold_optimization)
+
 
 This library provides a comprehensive toolkit for performing
 [Dual Threshold Optimization](https://doi.org/10.1101/gr.259655.119) (DTO)
@@ -278,24 +281,27 @@ The following provides details on the DTO algorithm, step by step.
     used to generate sets of features from each list to compare the overlap.
     The thresholds are calculated by the recurrence relation
 
-    $$ T_1 = 1 \\ Tn = Floor(T_{n-1} * 1.01 + 1) $$
+    <p align="center">
+      T<sub>1</sub> = 1<br/>
+      T<sub>n</sub> = ⌊ T<sub>n-1</sub> * 1.01 + 1 ⌋
+    </p>
     
     The stopping condition is when the threshold meets or exceeds the largest rank.
     The final threshold is always set to the max rank. This series provides finer
     spacing at higher ranks, allowing more granular selection among top-ranked genes.  
 
     The effect of this equation is that for the first 100 ranks, the thresholds
-    increment at the same rate as the ranks, so we have $1, 2, 3, \dots$ . At $100$, the 
-    resolution decreases by 2, eg $100, 102, 104, \dots$ . For every additional 100
+    increment at the same rate as the ranks, so we have 1, 2, 3, ... . At 100, the 
+    resolution decreases by 2, eg 100, 102, 104, ... . For every additional 100
     ranks after this, the resolution decreases by 1, so for instance:
-    $200, 203, 206, \dots, 402, 407, \dots, 1705, 1723, 1741$
+    200, 203, 206, ..., 402, 407, ..., 1705, 1723, 1741
 
 1. Conduct a brute force search of the threshold pairs to find an optimal overlap
 
     For each possible pair of thresholds, select the genes from each list with rank
     less than or equal to the respective threshold. Calculate the hypergeometric
     p-value by intersecting the feature sets. This is the core of the algorithm with
-    a complexity of $O(n^2)$ where $n$ is the length of the threshold lists.
+    a complexity of O(n^2) where n is the length of the threshold lists.
 
 1. Report the optimal threshold pair
 
