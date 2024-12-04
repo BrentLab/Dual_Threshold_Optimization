@@ -205,7 +205,11 @@ Where the fields are the following:
 
 To use the library in your own Rust program, you can
 `cargo add dual_threshold_optimization` in your rust project. See the crates.io
-documentation for more information about what is provided in each of the submodules.
+documentation for more information about what is provided in each of the submodules.  
+
+crates.io provides
+[documentation](https://docs.rs/dual_threshold_optimization/latest/dual_threshold_optimization/) 
+of the various structs, types, etc provided by `dual_threshold_optimization`.
 
 ### Developer installation and usage
 
