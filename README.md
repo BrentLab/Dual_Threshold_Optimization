@@ -40,14 +40,15 @@ see version 1.0.0, implemented by Yiming Kang, in the releases.
 ### With Cargo
 
 If you have [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html),
-the Rust package manager, installed, then you can install a binary into your `$PATH`:
+the Rust package manager, installed, then you can install a binary into your `$PATH`. 
+This is the recommended install method for most users:
 
 ```bash
 cargo install dual_threshold_optimization
 ```
 
-install the MPI version (note that the MPI version depends on an MPI installation, eg 
-openMPI, on your system)
+You can also install an MPI enabled version. This depends on an MPI installation, eg 
+openMPI, on your system.
 
 ```bash
 cargo install dual_threshold_optimization --features mpi
