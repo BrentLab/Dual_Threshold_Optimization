@@ -21,9 +21,6 @@ DTO provides the following statistics on the optimal threshold pair and overlap:
 - An estimate of the lower bound of the FDR based on the derivations detailed in the
   paper linked above.
 
-This crate offers both a library to incorporate DTO into other workflows, 
-and a command-line binary for standalone use.
-
 Note: Starting with version 2.0.0, the method was fully re-implemented in Rust. For
 the original implementation, which is the version used in the paper linked above,
 see version 1.0.0, implemented by Yiming Kang, in the releases.
