@@ -18,7 +18,8 @@ transcription factor, but could be used with any two ranked lists of features.
 DTO provides the following statistics on the optimal threshold pair and overlap:
 - An empirical p-value of the optimal overlap which is derived from a
   permutation-based null distribution.
-- An FDR estimation based on the derivations detailed in the paper linked above.
+- An estimate of the lower bound of the FDR based on the derivations detailed in the
+  paper linked above.
 
 This crate offers both a library to incorporate DTO into other workflows, 
 and a command-line binary for standalone use.
@@ -28,7 +29,7 @@ the original implementation, which is the version used in the paper linked above
 see version 1.0.0, implemented by Yiming Kang, in the releases.
 
 ## Table of Contents
-- [Getting Started](#user-installation)
+- [Installation](#installation)
     - [Using the cmd line](#using-the-cmd-line)
         - [Output](#output)
     - [Using the library](#using-the-library)
@@ -37,28 +38,31 @@ see version 1.0.0, implemented by Yiming Kang, in the releases.
 - [Troubleshooting](#troubleshooting)
 - [Acknowledgements](#acknowledgements)
 
-## Getting started
+## Installation
 
-Binaries for Linux, MacOS and Windows are provided in in the `release` tab. There are
-two flavors of releases for each OS:
+### With Cargo
 
-1. **The standard release**: this is suitable for almost every user
+If you have [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html),
+the Rust package manager, installed, then you can install a binary into your `$PATH`:
 
-2. **An MPI enabled version**: only if you want to parallelize across multiple machines.
-   **NOTE**: For this version, MPI must be installed on the host system.
+```bash
+cargo install dual_threshold_optimization
+```
 
-You can download pre-compiled binary for your operating system in the `releases` tab.
-MPI versions only exist for ubuntu. If one of the provided binaries doesn't work for
-your operating system, you can use the
-[developer instructions](#developer-installation-and-usage) to download the rust
-toolchain and compile a binary. Alternatively, open an Issue and we will help.  
+install the MPI version (note that the MPI version depends on an MPI installation, eg 
+openMPI, on your system)
 
-### Installation
+```bash
+cargo install dual_threshold_optimization --features mpi
+```
+
+### From a release binary
+
+Binaries for ubuntu (`default` and `mpi`), mac and windows (both only the default) are
+available on the [release page](https://github.com/BrentLab/Dual_Threshold_Optimization/releases).
 
 If you are on a Mac, for example, and you do not need MPI (most users), then you would
-download the binary called `dual_threshold_optimization-macos-latest-default` from the
-releases tab. There is also a windows executable, and both a default (non-mpi) and mpi
-version for ubuntu (which will work on most linux OS).
+download the binary called `dual_threshold_optimization-macos-latest-default`.
 
 After downloading to your computer, you will need to make this executable by entering
 
@@ -80,10 +84,11 @@ to rename the executable to simply `dual_threshold_optimization`.
 
 ### Using the cmd line
 
-With the correct binary, you can print the help message like so:
+With the correct binary, you can print the help message like so (omit the `./` if the 
+binary is in your `$PATH` of course):
 
 ```bash
-dual_threshold_optimization --help
+./dual_threshold_optimization --help
 ```
 
 ```bash
@@ -136,16 +141,16 @@ Options:
 
 You can run this with the following minimal test data:
 <!-- TODO: update the links when this goes to the main branch -->
-- input list examples: [list1](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/ranklist1.csv), [list2](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/ranklist2.csv)
-- background example: [background](https://github.com/cmatKhan/Dual_Threshold_Optimization/blob/rust_implementation/test_data/background.txt)
+- input list examples: [list1](https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/ranklist1.csv), [list2](https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/ranklist2.csv)
+- background example: [background](https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/background.txt)
 
-like this
+like this (the background file is not required, but could be provided):
 
 ```bash
 # download list1
-wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist1.csv
+wget https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/ranklist1.csv 
 # download list2
-wget https://raw.githubusercontent.com/cmatKhan/Dual_Threshold_Optimization/refs/heads/rust_implementation/test_data/ranklist2.csv
+wget https://raw.githubusercontent.com/BrentLab/Dual_Threshold_Optimization/refs/heads/main/test_data/ranklist2.csv
 
 # run the binary
 dual_threshold_optimization -1 ranklist1.csv -2 ranklist2.csv -p 5 -t 1
@@ -185,8 +190,8 @@ Where the fields are the following:
 
 - **empirical_pvalue**: The quantile of the unpermuted minimum p-value in relation to
   the series of permuted minimal p-values
-- **fdr**: The false discovery rate where the sensitivity is set to 0.8. See the
-  [DTO paper](https://doi.org/10.1101/gr.259655.119) for more details
+- **fdr**: The lower bound of the false discovery rate where the sensitivity is set to
+  0.8. See the [DTO paper](https://doi.org/10.1101/gr.259655.119) for more details
 - **population_size**: The size of the background. If no background is explicity
   provided, this is the length of the input lists (when no background is provided, 
   the lists must contain the same set of features)
@@ -250,7 +255,8 @@ cargo build --profile release-debug
 
 ### Test data
 
-Minimal test data can be found in the `test_data` subdirectory
+Minimal test data can be found in the
+[test_data](https://github.com/BrentLab/Dual_Threshold_Optimization/tree/main/test_data) subdirectory
 
 ### Performance Profiling
 
