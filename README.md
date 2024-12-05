@@ -210,11 +210,8 @@ Where the fields are the following:
 
 To use the library in your own Rust program, you can
 `cargo add dual_threshold_optimization` in your rust project. See the crates.io
-documentation for more information about what is provided in each of the submodules.  
-
-crates.io provides
-[documentation](https://docs.rs/dual_threshold_optimization/latest/dual_threshold_optimization/) 
-of the various structs, types, etc provided by `dual_threshold_optimization`.
+[documentation](https://docs.rs/dual_threshold_optimization/latest/dual_threshold_optimization/)
+for more information about what is provided in each of the submodules.  
 
 ### Developer installation and usage
 
@@ -263,16 +260,18 @@ Minimal test data can be found in the
 I recommend profiling with [hyperfine](https://github.com/sharkdp/hyperfine)
 for runtime and [heaptrack](https://github.com/KDE/heaptrack) for memory.
 The results of profiling on the test data are in the `/profiling` subdirectory. Use the
-`release-debug` profile to build an executable for performance profiling.
+`--profile release-debug` profile to build an executable for performance profiling.
 
 ### Pre-commit and CI
 
-Pre-commit is set up to run `cargo fmt` and `clippy` when you commit changes. There is
-also github actions CI set up to run the test suite, the linters (`fmt` and `clippy`), 
-and on pulls to `main`, to create a release. In order for the release workflow to
-succeed, the version in `Cargo.toml` must not be the same as the current state of
-`main`. The release CI will build the binaries and add them to the release. You are
-responsible for updating the release notes after the workflow completes.
+[Pre-commit](https://pre-commit.com/#install) is set up to run `cargo fmt` and
+`clippy` when you commit changes. After pulling the repo, `cd` in and run
+`pre-commit install`. There is also github actions CI set up to run the test suite,
+the linters (`fmt` and `clippy`), and on pulls to `main`, to create a release. In
+order for the release workflow to succeed, the version in `Cargo.toml` must not be the
+same as the current state of `main`. The release CI will build the binaries and add
+them to the release. You are responsible for updating the release notes after the
+workflow completes.
 
 ## Algorithmic details
 
