@@ -96,14 +96,14 @@ Usage: dual_threshold_optimization [OPTIONS] --ranked-list1 <FILE> --ranked-list
 
 Options:
   -1, --ranked-list1 <FILE>
-          Path to the first ranked feature list (CSV format).
+          Path to the first ranked feature list (CSV format). Rank 1 is the most important gene.
           
           This should have two columns: "feature" and "rank". There should be **NO HEADER**.
           
           Rank is expected to be an integer. It is recommended that ties are handed with the `min` or `max` method.
 
   -2, --ranked-list2 <FILE>
-          Path to the second ranked feature list (CSV format)
+          Path to the second ranked feature list (CSV format). Rank 1 is the most important gene.
           
           This should have two columns: "feature" and "rank". There should be **NO HEADER**.
           
