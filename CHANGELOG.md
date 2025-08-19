@@ -1,9 +1,15 @@
 # Changelog
 
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 2.0.2 (dev, not versioned in cargo yet or in package. in progress)
+
+1. Updating the cmd line interface to specify that rank 1 is the most important feature.
+  Some clippy re-formating to the README and comments -- no code changes.
 
 ## 2.0.1
 
