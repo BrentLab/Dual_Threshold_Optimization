@@ -20,7 +20,7 @@ use dual_threshold_optimization::stat_operations::empirical_pvalue;
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    /// Path to the first ranked feature list (CSV format).  
+    /// Path to the first ranked feature list (CSV format).Rank 1 is the most important feature.
     ///
     /// This should have two columns: "feature" and "rank". There should be
     /// **NO HEADER**.  
@@ -30,7 +30,7 @@ struct Cli {
     #[arg(short = '1', long, value_name = "FILE")]
     ranked_list1: PathBuf,
 
-    /// Path to the second ranked feature list (CSV format)
+    /// Path to the second ranked feature list (CSV format). Rank 1 is the most important feature.
     ///
     /// This should have two columns: "feature" and "rank". There should be
     /// **NO HEADER**.  

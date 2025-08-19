@@ -277,66 +277,66 @@ The following provides details on the DTO algorithm, step by step.
 
 1. Initialize two ranked feature lists
 
-    Begin with two ranked lists of features, e.g. genes, where each feature has
-    an id, e.g. a unique identifier for the gene, and a rank. The rank must be an
-    integer and is expected to have ties handled with a method such as "min" or "max"
-    where ties all are assigned the same rank.
+   Begin with two ranked lists of features, e.g. genes, where each feature has
+   an id, e.g. a unique identifier for the gene, and a rank. The rank must be an
+   integer and is expected to have ties handled with a method such as "min" or "max"
+   where ties all are assigned the same rank.
     
 1. Create a series of thresholds for each list based on the ranks
 
-    For each list, generate a series of thresholds T1, T2, ... . These thresholds are
-    used to generate sets of features from each list to compare the overlap.
-    The thresholds are calculated by the recurrence relation
+   For each list, generate a series of thresholds T1, T2, ... . These thresholds are
+   used to generate sets of features from each list to compare the overlap.
+   The thresholds are calculated by the recurrence relation
 
-    <p align="center">
-      T<sub>1</sub> = 1<br/>
-      T<sub>n</sub> = ⌊ T<sub>n-1</sub> * 1.01 + 1 ⌋
-    </p>
+   <p align="center">
+     T<sub>1</sub> = 1<br/>
+     T<sub>n</sub> = ⌊ T<sub>n-1</sub> * 1.01 + 1 ⌋
+   </p>
     
-    The stopping condition is when the threshold meets or exceeds the largest rank.
-    The final threshold is always set to the max rank. This series provides finer
-    spacing at higher ranks, allowing more granular selection among top-ranked genes.  
+   The stopping condition is when the threshold meets or exceeds the largest rank.
+   The final threshold is always set to the max rank. This series provides finer
+   spacing at higher ranks, allowing more granular selection among top-ranked genes.  
 
-    The effect of this equation is that for the first 100 ranks, the thresholds
-    increment at the same rate as the ranks, so we have 1, 2, 3, ... . At 100, the 
-    resolution decreases by 2, eg 100, 102, 104, ... . For every additional 100
-    ranks after this, the resolution decreases by 1, so for instance:
-    200, 203, 206, ..., 402, 407, ..., 1705, 1723, 1741
+   The effect of this equation is that for the first 100 ranks, the thresholds
+   increment at the same rate as the ranks, so we have 1, 2, 3, ... . At 100, the 
+   resolution decreases by 2, eg 100, 102, 104, ... . For every additional 100
+   ranks after this, the resolution decreases by 1, so for instance:
+   200, 203, 206, ..., 402, 407, ..., 1705, 1723, 1741
 
 1. Conduct a brute force search of the threshold pairs to find an optimal overlap
 
-    For each possible pair of thresholds, select the genes from each list with rank
-    less than or equal to the respective threshold. Calculate the hypergeometric
-    p-value by intersecting the feature sets. This is the core of the algorithm with
-    a complexity of O(n^2) where n is the length of the threshold lists.
+   For each possible pair of thresholds, select the genes from each list with rank
+   less than or equal to the respective threshold. Calculate the hypergeometric
+   p-value by intersecting the feature sets. This is the core of the algorithm with
+   a complexity of O(n^2) where n is the length of the threshold lists.
 
 1. Report the optimal threshold pair
 
-    Return the threshold pair that describes the respective rank of each list that
-    produces the feature sets that result in the minimum hypergeometric p-value
-    (one-sided, upper only) across all tested threshold pairs. This threshold pair is
-    considered optimal for identifying significant overlap between two ranked feature
-    lists.
+   Return the threshold pair that describes the respective rank of each list that
+   produces the feature sets that result in the minimum hypergeometric p-value
+   (one-sided, upper only) across all tested threshold pairs. This threshold pair is
+   considered optimal for identifying significant overlap between two ranked feature
+   lists.
 
-    **CAVEAT**: Though infrequent, due to the interplay between
-    parameters of the hypergeometric distribution, it is possible that multiple sets
-    yield the same p-value, including the minimal p-value. When this occurs on the
-    minimal p-value, the threshold pair that yields the largest overlap is selected 
-    as optimal. When there are multiple threshold pairs that have the same p-value and
-    the same intersect size, the first in the set is chosen arbitrarily.
+   **CAVEAT**: Though infrequent, due to the interplay between
+   parameters of the hypergeometric distribution, it is possible that multiple sets
+   yield the same p-value, including the minimal p-value. When this occurs on the
+   minimal p-value, the threshold pair that yields the largest overlap is selected 
+   as optimal. When there are multiple threshold pairs that have the same p-value and
+   the same intersect size, the first in the set is chosen arbitrarily.
 
 1. Use permutations to generate a null distribution for the minimal p-value
 
-    To assess the statistical significance of the identified threshold pair, run steps
-    3 and 4 multiple times (e.g., 1000 times) on randomized versions of the
-    ranked lists (features assigned to ranks arbitrarily). This creates a null
-    distribution of the minimal p-value and allows calculation of an empirical p-value
-    of observing the previously identified optimal threshold pair by chance.
+   To assess the statistical significance of the identified threshold pair, run steps
+   3 and 4 multiple times (e.g., 1000 times) on randomized versions of the
+   ranked lists (features assigned to ranks arbitrarily). This creates a null
+   distribution of the minimal p-value and allows calculation of an empirical p-value
+   of observing the previously identified optimal threshold pair by chance.
 
 1. Calculate false discovery rate (FDR)
 
-    In the [DTO paper](https://doi.org/10.1101/gr.259655.119), an FDR is derived. This
-    FDR is estimated for the optimal threshold pair.
+   In the [DTO paper](https://doi.org/10.1101/gr.259655.119), an FDR is derived. This
+   FDR is estimated for the optimal threshold pair.
 
 
 ## Troubleshooting

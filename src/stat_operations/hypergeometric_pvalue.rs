@@ -12,7 +12,7 @@ use statrs::distribution::{DiscreteCDF, Hypergeometric};
 /// * `successes_in_population` (`usize`) - The size of one set (`K`).
 /// * `sample_size` (`usize`) - The size of the other set (`n`).
 /// * `observed_overlap` (`usize`) - The size of the intersection between the
-///    two sets (`k`).
+///   two sets (`k`).
 ///
 /// # Returns
 ///

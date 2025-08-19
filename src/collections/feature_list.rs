@@ -291,7 +291,7 @@ impl FeatureList {
     /// # Arguments
     /// - `other`: The other `FeatureList` to compare against.
     /// - `symmetric`: If `true`, computes the symmetric difference (genes in one list but not both).
-    ///                If `false`, computes the set difference (genes in `self` but not in `other`).
+    ///   If `false`, computes the set difference (genes in `self` but not in `other`).
     ///
     /// # Returns
     /// A new `FeatureList` containing the resulting genes.
